@@ -8,27 +8,31 @@ Blackbird is the new automation backbone for the language technology industry. B
 
 Sitecore is one of the leading enterprise-level content management systems, enabling web content editors and marketers to have full control over all aspects of their website from social integration and blog posts to advanced personalisation, ecommerce and more. This app focusses on the integration between Sitecore items, languages and the rest of the Blackbird ecosystem. Contrary to other Blackbird apps, in order to get up and running you need to install a custom-built plugin on your Sitecore instance.
 
+This app is built for Sitecore XP. For Sitecore XM Cloud see [this guide](https://docs.blackbird.io/apps/sitecore-xp/) instead.
+
 ## Before setting up
 
 Before you can connect you need to make sure that:
 
-- You have access to an instance of Sitecore.
-- You have sufficient administrator access in Sitecore to install a plugin.
-- You have downloaded the latest Blackbird Sitecore plugin package from [here](https://docs.blackbird.io/sitecore/Sitecore.BlackbirdIntegration-0.0.1.zip).
+- You have access to XM Cloud Deploy, its credential management and an active Sitecore project.
+- You have access to the source code repository (Github) of a Sitecore project and the ability to configure new plugins.
+- You have downloaded the latest Blackbird Sitecore plugin package from [here](https://docs.blackbird.io/sitecore/package.zip).
 
 ## Installing the plugin
 
-1. Navigate to the installation wizzard.
+Assuming your source content repository is forked form this [repo](https://github.com/sitecorelabs/xmcloud-foundation-head).
 
-![1706110503246](image/README/1706110503246.png)
+1. Extract the files from [package.zip](https://docs.blackbird.io/sitecore/package.zip)
+2. Copy the 2 config files from `package\files\App_Config\Include\BlackBird` in the package to `authoring\platform\App_Config\Include\` in the source code repository.
+3. Copy the 2 dll files from `package\files\bin` in the package to `authoring\platform\_dlls` in the source code repository.
+4. Open the `XmCloudAuthoring.sln` in Visual Studio (or any other .NET compatible IDE) and add references to the added .dll files in the Platform project.
+5. Also include file references to the 2 config files.
 
-2. Upload the plugin package you received from Blackbird.
+Your solution should look something like this now:
 
-![1706110550965](image/README/1706110550965.png)
+![1738074666500](image/README/1738074666500.png)
 
-3. Click _Next_.
-4. Click _Install_.
-5. Click _Close_.
+6. Build and/or push your code so that a redeployment is triggered.
 
 ## Creating an API key
 
@@ -47,16 +51,23 @@ Before you can connect you need to make sure that:
 
 6. Copy the Item ID (including the parentheses) - this is your key and can be used in the next steps.
 
+## Creating an XM Cloud Client
+
+1. In XM Cloud, go to the [credentials tab](https://deploy.sitecorecloud.io/credentials).
+2. Click _Create credentials_ and add a recognizable label.
+3. Copy the _Client ID_ and _Client Secret_ for next steps.
+
 ## Connecting
 
-1. Navigate to apps and search for Sitecore. If you cannot find Sitecore then click _Add App_ in the top right corner, select Sitecore and add the app to your Blackbird environment.
+1. Navigate to apps and search for Sitecore XM Cloud.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Sitecore connection'.
-4. Fill in the URL to your Sitecore instance
-5. Fill in the API key from the previous section.
-6. Click _Connect_.
+4. Fill in the base URL to your Sitecore instance.
+5. Fill in the API key from the _Creating an API key_ section.
+6. Fill in the Client ID and Client Secret from the  _Creating an XM Cloud Client_ section.
+7. Click _Connect_.
 
-![1706111666447](image/README/1706111666447.png)
+![1738074896204](image/README/1738074896204.png)
 
 ## Actions
 
