@@ -29,4 +29,20 @@ public class ItemsTests : TestBase
         Console.WriteLine(JsonConvert.SerializeObject(result.Items, Formatting.Indented));
         Assert.IsTrue(result.Items.Count() > 0);
     }
+
+
+    [TestMethod]
+    public async Task Get_Item_As_HTML_works()
+    {
+        var actions = new ContentActions(InvocationContext, FileManager);
+        var input = new ItemContentRequest { 
+            ItemId = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}",
+            Version = "Copy of About Us_1"
+        };
+
+        var result = await actions.GetItemContent(input);
+
+        Console.WriteLine($"File: {result.File.Name}");
+        Assert.IsNotNull(result.File);
+    }
 }
