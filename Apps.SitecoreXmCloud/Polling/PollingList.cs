@@ -21,14 +21,14 @@ public class PollingList : SitecoreInvocable
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
         => HandleItemsPolling(request,
-            $"locale={input.Locale}&rootPath={input.RootPath}&createdAt={request.Memory?.LastInteractionDate}&createdOperation=GreaterOrEqual");
+             $"locale={input.Locale}&rootPath={input.RootPath}&createdAt={request.Memory?.LastInteractionDate}&createdOperation=GreaterOrEqual");
 
     [PollingEvent("On items updated", "On any items updated")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
         => HandleItemsPolling(request,
-            $"locale={input.Locale}&rootPath={input.RootPath}&createdAt={request.Memory?.LastInteractionDate}&createdOperation=GreaterOrEqual");
+            $"locale={input.Locale}&rootPath={input.RootPath}&updatedAt={request.Memory?.LastInteractionDate}&updatedOperation=GreaterOrEqual");
 
     private async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsPolling(
         PollingEventRequest<DateMemory> request, string query)
