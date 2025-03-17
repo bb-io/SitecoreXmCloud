@@ -9,4 +9,7 @@ public class PollingItemRequest
     [Display("Language")]
     [DataSource(typeof(LocaleDataHandler))]
     public string Locale { get; set; }
+
+    [Display("Root path")]
+    public string? RootPath { get; set; }
 }
