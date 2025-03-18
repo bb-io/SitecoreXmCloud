@@ -24,7 +24,17 @@ public class ItemsActions : SitecoreInvocable
         var endpoint = "/Search".WithQuery(input);
         var request = new SitecoreRequest(endpoint, Method.Get, Creds);
 
-        var response = await Client.Paginate<ItemEntity>(request);
-        return new(response);
+        var items = await Client.Paginate<ItemEntity>(request);
+
+        var latestItems = items
+                   .GroupBy(item => item.Id)
+                   .Select(g => g.OrderByDescending(item =>
+                   {
+                       int versionNumber;
+                       return int.TryParse(item.Version, out versionNumber) ? versionNumber : 0;
+                   }).First())
+                   .ToList();
+
+        return new ListItemsResponse(latestItems);
     }
 }
