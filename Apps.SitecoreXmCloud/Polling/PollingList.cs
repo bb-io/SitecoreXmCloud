@@ -20,17 +20,31 @@ public class PollingList : SitecoreInvocable
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsCreated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
-        => HandleItemsPolling(request,
-             $"locale={input.Locale}&rootPath={input.RootPath}&createdAt={request.Memory?.LastInteractionDate}&createdOperation=GreaterOrEqual");
+    {
+        var dateOnly = request.Memory?.LastInteractionDate.Date.ToString("yyyy-MM-dd");
+        var encodedDate = dateOnly != null ? Uri.EscapeDataString(dateOnly) : string.Empty;
+
+
+        var query = $"locale={input.Locale}&rootPath={input.RootPath}&createdAt={encodedDate}&createdOperation=GreaterOrEqual";
+
+        return HandleItemsPolling(request, query);
+    }
 
     [PollingEvent("On items updated", "On any items updated")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
-        => HandleItemsPolling(request,
-            $"locale={input.Locale}&rootPath={input.RootPath}&updatedAt={request.Memory?.LastInteractionDate}&updatedOperation=GreaterOrEqual");
+    {
+        var dateOnly = request.Memory?.LastInteractionDate.Date.ToString("yyyy-MM-dd");
+        var encodedDate = dateOnly != null ? Uri.EscapeDataString(dateOnly) : string.Empty;
 
-    private async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsPolling(
+        var query = $"locale={input.Locale}&rootPath={input.RootPath}&updatedAt={encodedDate}&updatedOperation=GreaterOrEqual";
+
+        return HandleItemsPolling(request, query);
+    }
+
+
+    public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsPolling(
         PollingEventRequest<DateMemory> request, string query)
     {
         if (request.Memory == null)
