@@ -19,7 +19,7 @@ namespace Tests.Sitecore
             var polling = new PollingList(InvocationContext);
             var initialMemory = new DateMemory
             {
-                LastInteractionDate = DateTime.UtcNow.AddHours(-2.5)
+                LastInteractionDate = DateTime.UtcNow.AddHours(-5)
             };
 
             var request = new PollingEventRequest<DateMemory>
