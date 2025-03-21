@@ -32,7 +32,7 @@ public class ItemsActions : SitecoreInvocable
                    {
                        int versionNumber;
                        return int.TryParse(item.Version, out versionNumber) ? versionNumber : 0;
-                   }).First())
+                   }).FirstOrDefault())
                    .ToList();
 
         return new ListItemsResponse(latestItems);
