@@ -8,7 +8,7 @@ Blackbird is the new automation backbone for the language technology industry. B
 
 Sitecore is one of the leading enterprise-level content management systems, enabling web content editors and marketers to have full control over all aspects of their website from social integration and blog posts to advanced personalisation, ecommerce and more. This app focusses on the integration between Sitecore items, languages and the rest of the Blackbird ecosystem. Contrary to other Blackbird apps, in order to get up and running you need to install a custom-built plugin on your Sitecore instance.
 
-This app is built for Sitecore XP. For Sitecore XM Cloud see [this guide](https://docs.blackbird.io/apps/sitecore-xp/) instead.
+This app is built for Sitecore XM Cloud. For Sitecore XP see [this guide](https://docs.blackbird.io/apps/sitecore-xp/) instead.
 
 ## Before setting up
 
