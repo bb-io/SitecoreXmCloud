@@ -1,6 +1,8 @@
 ﻿using Apps.Sitecore.Actions;
 using Apps.Sitecore.Connections;
+using Apps.Sitecore.Models;
 using Apps.Sitecore.Models.Requests.Item;
+using Blackbird.Applications.Sdk.Common.Files;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -37,7 +39,7 @@ public class ItemsTests : TestBase
         var actions = new ContentActions(InvocationContext, FileManager);
         var input = new ItemContentRequest { 
             ItemId = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}",
-            Version = "Copy of About Us_1"
+            //Version = "Copy of About Us_1"
         };
 
         var result = await actions.GetItemContent(input);
@@ -45,4 +47,31 @@ public class ItemsTests : TestBase
         Console.WriteLine($"File: {result.File.Name}");
         Assert.IsNotNull(result.File);
     }
+
+    [TestMethod]
+    public async Task Update_Item_from_HTML_works()
+    {
+        var actions = new ContentActions(InvocationContext, FileManager);
+        var input = new ItemContentOptionalRequest
+        {
+            ItemId = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}"
+        };
+
+        var file = new FileModel
+        {
+            File = new FileReference
+            {
+                Name = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}.html"
+            }
+        };
+        var item = new UpdateItemContentRequest
+        {
+        };
+
+       await actions.UpdateItemContent(input, file, item);
+
+        Assert.IsTrue(true);    
+    }
 }
+
+

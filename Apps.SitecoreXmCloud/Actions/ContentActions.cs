@@ -15,6 +15,7 @@ using Blackbird.Applications.Sdk.Utils.Extensions.Files;
 using Blackbird.Applications.Sdk.Utils.Extensions.String;
 using HtmlAgilityPack;
 using RestSharp;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 
 namespace Apps.Sitecore.Actions;
 
@@ -50,7 +51,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         var html = Encoding.UTF8.GetString(bytes);
         var extractedItemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
         
-        var itemId = itemContent.ItemId ?? extractedItemId ?? throw new Exception("Didn't find item Item ID in the HTML file. Please provide it in the input.");
+        var itemId = itemContent.ItemId ?? extractedItemId ?? throw new PluginMisconfigurationException("Didn't find item Item ID in the HTML file. Please provide it in the input.");
         itemContent.ItemId = itemId;
 
         if (input.AddNewVersion is true)
