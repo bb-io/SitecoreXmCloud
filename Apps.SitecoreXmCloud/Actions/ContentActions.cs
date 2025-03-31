@@ -16,6 +16,7 @@ using Blackbird.Applications.Sdk.Utils.Extensions.String;
 using HtmlAgilityPack;
 using RestSharp;
 using Blackbird.Applications.Sdk.Common.Exceptions;
+using Apps.SitecoreXmCloud.Models;
 
 namespace Apps.Sitecore.Actions;
 
@@ -29,7 +30,17 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         var endpoint = "/Content".WithQuery(input);
         var request = new SitecoreRequest(endpoint, Method.Get, Creds);
 
-        var response = await Client.ExecuteWithErrorHandling<Dictionary<string, string>>(request);
+        IEnumerable<FieldModel> response;
+        try
+        {
+            response = await Client.ExecuteWithErrorHandling<IEnumerable<FieldModel>>(request);
+        }
+        catch
+        {
+            var oldresponse = await Client.ExecuteWithErrorHandling<Dictionary<string, string>>(request);
+            response = oldresponse.Select(x => new FieldModel { ID = x.Key, Value = x.Value }).ToArray();
+        }
+
         var html = SitecoreHtmlConverter.ToHtml(response, input.ItemId);
 
         var file = await fileManagementClient.UploadAsync(new MemoryStream(html), MediaTypeNames.Text.Html,

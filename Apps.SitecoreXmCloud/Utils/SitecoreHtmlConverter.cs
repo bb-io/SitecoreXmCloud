@@ -1,4 +1,5 @@
 using System.Text;
+using Apps.SitecoreXmCloud.Models;
 using Blackbird.Applications.Sdk.Utils.Html.Extensions;
 using HtmlAgilityPack;
 
@@ -8,7 +9,7 @@ public static class SitecoreHtmlConverter
 {
     private const string IdAttr = "id";
 
-    public static byte[] ToHtml(Dictionary<string, string> fields, string itemId)
+    public static byte[] ToHtml(IEnumerable<FieldModel> fields, string itemId)
     {
         var htmlDoc = new HtmlDocument();
         var htmlNode = htmlDoc.CreateElement("html");
@@ -28,7 +29,11 @@ public static class SitecoreHtmlConverter
         {
             var fieldNode = htmlDoc.CreateElement("div");
 
-            fieldNode.SetAttributeValue(IdAttr, x.Key);
+            fieldNode.SetAttributeValue(IdAttr, x.ID);
+            if (!String.IsNullOrEmpty(x.Type))
+            {
+                fieldNode.SetAttributeValue("data-fieldType", x.Type);
+            }
             fieldNode.InnerHtml = x.Value;
 
             bodyNode.AppendChild(fieldNode);
