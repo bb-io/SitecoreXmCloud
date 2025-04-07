@@ -41,8 +41,9 @@ public class ItemsTests : TestBase
             ItemId = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}",
             //Version = "Copy of About Us_1"
         };
+        var fileFormat = new Apps.SitecoreXmCloud.Models.Requests.Item.FileFormatInput { Format = "html"};
 
-        var result = await actions.GetItemContent(input);
+        var result = await actions.GetItemContent(input, fileFormat);
 
         Console.WriteLine($"File: {result.File.Name}");
         Assert.IsNotNull(result.File);

@@ -17,6 +17,8 @@ using HtmlAgilityPack;
 using RestSharp;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Apps.SitecoreXmCloud.Models;
+using Apps.SitecoreXmCloud.Models.Requests.Item;
+using Apps.SitecoreXmCloud.Utils;
 
 namespace Apps.Sitecore.Actions;
 
@@ -24,8 +26,8 @@ namespace Apps.Sitecore.Actions;
 public class ContentActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : SitecoreInvocable(invocationContext)
 {
-    [Action("Get item content as HTML", Description = "Get content of the specific item in HTML format")]
-    public async Task<FileModel> GetItemContent([ActionParameter] ItemContentRequest input)
+    [Action("Download item content", Description = "Get content of the specific item in a file")]
+    public async Task<FileModel> GetItemContent([ActionParameter] ItemContentRequest input, [ActionParameter] FileFormatInput format)
     {
         var endpoint = "/Content".WithQuery(input);
         var request = new SitecoreRequest(endpoint, Method.Get, Creds);
@@ -41,26 +43,54 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             response = oldresponse.Select(x => new FieldModel { ID = x.Key, Value = x.Value }).ToArray();
         }
 
-        var html = SitecoreHtmlConverter.ToHtml(response, input.ItemId);
-
-        var file = await fileManagementClient.UploadAsync(new MemoryStream(html), MediaTypeNames.Text.Html,
-            $"{input.ItemId}.html");
-        return new()
+        if (format.Format == "html")
         {
-            File = file
-        };
+            var html = SitecoreHtmlConverter.ToHtml(response, input.ItemId);
+
+            var file = await fileManagementClient.UploadAsync(new MemoryStream(html), MediaTypeNames.Text.Html,
+                $"{input.ItemId}.html");
+            return new()
+            {
+                File = file
+            };
+        }
+        else if (format.Format == "json")
+        {
+            var json = SitecoreJsonConverter.GetJsonBytes(response, input.ItemId);
+
+            var file = await fileManagementClient.UploadAsync(new MemoryStream(json), MediaTypeNames.Application.Json,
+                $"{input.ItemId}.json");
+            return new()
+            {
+                File = file
+            };
+        }
+
+        return new FileModel();       
     }
 
-    [Action("Update item content from HTML", Description = "Update content of the specific item from HTML file")]
+    [Action("Upload item content", Description = "Update content of the specific item from a file")]
     public async Task UpdateItemContent(
         [ActionParameter] ItemContentOptionalRequest itemContent,
         [ActionParameter] FileModel file,
         [ActionParameter] UpdateItemContentRequest input)
     {
-        var htmlStream = await fileManagementClient.DownloadAsync(file.File);
-        var bytes = await htmlStream.GetByteData();
-        var html = Encoding.UTF8.GetString(bytes);
-        var extractedItemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
+        var fileStream = await fileManagementClient.DownloadAsync(file.File);
+        var bytes = await fileStream.GetByteData();
+        string extractedItemId = "";
+        var sitecoreFields = new Dictionary<string, string>();
+
+        if (file.File.Name.EndsWith(".html"))
+        {
+            var html = Encoding.UTF8.GetString(bytes);
+            extractedItemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
+            sitecoreFields = SitecoreHtmlConverter.ToSitecoreFields(bytes);
+        }
+        else if (file.File.Name.EndsWith(".json"))
+        {
+            extractedItemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
+            sitecoreFields = await SitecoreJsonConverter.ExtractFromJsonAsync(bytes);
+        }
         
         var itemId = itemContent.ItemId ?? extractedItemId ?? throw new PluginMisconfigurationException("Didn't find item Item ID in the HTML file. Please provide it in the input.");
         itemContent.ItemId = itemId;
@@ -70,9 +100,6 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             itemContent.Version = null;
             await CreateItemContent(new ItemContentRequest { ItemId = itemContent.ItemId, Version = itemContent.Version, Locale = itemContent.Locale});
         }
-
-        var sitecoreFields = SitecoreHtmlConverter.ToSitecoreFields(bytes);
-
         var endpoint = "/Content".WithQuery(itemContent);
         var request = new SitecoreRequest(endpoint, Method.Put, Creds);
 
@@ -81,13 +108,22 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         await Client.ExecuteWithErrorHandling(request);
     }
     
-    [Action("Get Item ID from HTML", Description = "Extract Item ID from HTML file")]
+    [Action("Get Item ID from file", Description = "Extract Item ID from file")]
     public async Task<GetItemIdFromHtmlResponse> GetItemIdFromHtml([ActionParameter] FileModel file)
     {
         var htmlStream = await fileManagementClient.DownloadAsync(file.File);
         var bytes = await htmlStream.GetByteData();
-        var html = Encoding.UTF8.GetString(bytes);
-        var itemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
+        string itemId = "";
+
+        if (file.File.Name.EndsWith(".html"))
+        {
+            var html = Encoding.UTF8.GetString(bytes);
+            itemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
+        }
+        else if (file.File.Name.EndsWith(".json"))
+        {
+            itemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
+        }
         
         return new GetItemIdFromHtmlResponse
         {
