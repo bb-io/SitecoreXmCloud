@@ -73,10 +73,10 @@ Your solution should look something like this now:
 
 - **Search items** finds items based on your search criteria, including last updated, created, language, path, etc.
 - **Get all configured languages** returns all the languages that are configured in this Sitecore instance.
-- **Get item content as HTML** get the content of an item represented as an HTML file so that it can be processed by NMT or TMS. You can specify which version/language should be retrieved.
-- **Update item content from HTML** updates the content of a specific version/language. Additionally, you can choose to always create a new version.
+- **Download item content** get the content of an item represented as an HTML or JSON file so that it can be processed by NMT or TMS. You can specify which version/language should be retrieved.
+- **Upload item content** updates the content of a specific version/language from the file exported using _Download content item_ action. Additionally, you can choose to always create a new version.
 - **Delete item content** deletes an item.
-- **Get Item ID from HTML** retrieves the item ID from the HTML content. When you receive translated HTML content we will add the Item ID to the header of HTML file, this action allows you to receive the Item ID from the HTML document.
+- **Get Item ID from file** retrieves the item ID from the HTML/JSON content. When you get the item content as a file, we will add the Item ID to the header of the file, this action allows you to receive the Item ID from the document.
 
 ## Events
 
