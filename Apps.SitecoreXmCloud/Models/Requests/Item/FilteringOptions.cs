@@ -16,12 +16,12 @@ namespace Apps.SitecoreXmCloud.Models.Requests.Item
         public IEnumerable<string>? TypeKey { get; set; }
 
 
-        //[Display("Exclude fields where Definition property equals")]
-        //public IEnumerable<string>? Definition { get; set; }
+        [Display("Exclude fields where Definition property equals")]
+        public IEnumerable<string>? Definition { get; set; }
 
 
-        //[Display("Exclude fields where Description property equals")]
-        //public IEnumerable<string>? Description { get; set; }
+        [Display("Exclude fields where Description property equals")]
+        public IEnumerable<string>? Description { get; set; }
 
 
         [Display("Exclude fields where DisplayName property equals")]
@@ -40,8 +40,8 @@ namespace Apps.SitecoreXmCloud.Models.Requests.Item
         public IEnumerable<string>? Section { get; set; }
 
 
-        //[Display("Exclude fields where SectionDisplayName property equals")]
-        //public IEnumerable<string>? SectionDisplayName { get; set; }
+        [Display("Exclude fields where SectionDisplayName property equals")]
+        public IEnumerable<string>? SectionDisplayName { get; set; }
 
 
         [Display("Exclude fields where Title property equals")]

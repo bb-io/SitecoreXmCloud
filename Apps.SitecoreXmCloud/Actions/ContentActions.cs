@@ -61,7 +61,12 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         { response = response.Where(x => !filter.Value.Contains(x.Value)); }
         if (filter.Title != null)
         { response = response.Where(x => !filter.Title.Contains(x.Title)); }
-
+        if (filter.Description != null)
+        { response = response.Where(x => !filter.Description.Contains(x.Description)); }
+        if (filter.Definition != null)
+        { response = response.Where(x => !filter.Definition.Contains(x.Definition)); }
+        if (filter.SectionDisplayName != null)
+        { response = response.Where(x => !filter.SectionDisplayName.Contains(x.SectionDisplayName)); }
 
         if (format.Format == "html")
         {

@@ -59,6 +59,14 @@ public static class SitecoreHtmlConverter
             {
                 fieldNode.SetAttributeValue("data-sectionDisplayName", x.SectionDisplayName);
             }
+            if (!String.IsNullOrEmpty(x.Description))
+            {
+                fieldNode.SetAttributeValue("data-description", x.Description);
+            }
+            if (!String.IsNullOrEmpty(x.Definition))
+            {
+                fieldNode.SetAttributeValue("data-definition", x.Definition);
+            }
             fieldNode.InnerHtml = x.Value;
 
             bodyNode.AppendChild(fieldNode);
