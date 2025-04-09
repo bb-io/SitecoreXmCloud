@@ -2,6 +2,7 @@
 using Apps.Sitecore.Connections;
 using Apps.Sitecore.Models;
 using Apps.Sitecore.Models.Requests.Item;
+using Apps.SitecoreXmCloud.Models.Requests.Item;
 using Blackbird.Applications.Sdk.Common.Files;
 using Newtonsoft.Json;
 using System;
@@ -42,8 +43,9 @@ public class ItemsTests : TestBase
             //Version = "Copy of About Us_1"
         };
         var fileFormat = new Apps.SitecoreXmCloud.Models.Requests.Item.FileFormatInput { Format = "html"};
+        var filter = new FilteringOptions();
 
-        var result = await actions.GetItemContent(input, fileFormat);
+        var result = await actions.GetItemContent(input, fileFormat,filter);
 
         Console.WriteLine($"File: {result.File.Name}");
         Assert.IsNotNull(result.File);
