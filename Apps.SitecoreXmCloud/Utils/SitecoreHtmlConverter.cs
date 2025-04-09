@@ -1,5 +1,6 @@
 using System.Text;
 using Apps.SitecoreXmCloud.Models;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Utils.Html.Extensions;
 using HtmlAgilityPack;
 
@@ -70,8 +71,15 @@ public static class SitecoreHtmlConverter
     {
         var htmlDoc = Encoding.UTF8.GetString(html).AsHtmlDocument();
         var bodyNode = htmlDoc.DocumentNode.SelectSingleNode("/html/body");
-        
-        return bodyNode.ChildNodes.ToDictionary(x => x.Attributes[IdAttr].Value, x => x.InnerHtml);
+        try
+        {
+
+            return bodyNode.ChildNodes.ToDictionary(x => x.Attributes[IdAttr].Value, x => x.InnerHtml);
+        }
+        catch 
+        {
+            throw new PluginMisconfigurationException("There is no content to extract from the provided file or the format was not the expected one.");
+        }
     }
     
     public static string? ExtractItemIdFromHtml(string html)
