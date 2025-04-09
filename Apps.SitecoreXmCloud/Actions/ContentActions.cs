@@ -19,6 +19,7 @@ using Blackbird.Applications.Sdk.Common.Exceptions;
 using Apps.SitecoreXmCloud.Models;
 using Apps.SitecoreXmCloud.Models.Requests.Item;
 using Apps.SitecoreXmCloud.Utils;
+using System.Security.Cryptography;
 
 namespace Apps.Sitecore.Actions;
 
@@ -27,7 +28,8 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
     : SitecoreInvocable(invocationContext)
 {
     [Action("Download item content", Description = "Get content of the specific item in a file")]
-    public async Task<FileModel> GetItemContent([ActionParameter] ItemContentRequest input, [ActionParameter] FileFormatInput format)
+    public async Task<FileModel> GetItemContent([ActionParameter] ItemContentRequest input, [ActionParameter] FileFormatInput format,
+        [ActionParameter] FilteringOptions filter)
     {
         var endpoint = "/Content".WithQuery(input);
         var request = new SitecoreRequest(endpoint, Method.Get, Creds);
@@ -42,6 +44,24 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             var oldresponse = await Client.ExecuteWithErrorHandling<Dictionary<string, string>>(request);
             response = oldresponse.Select(x => new FieldModel { ID = x.Key, Value = x.Value }).ToArray();
         }
+
+        if (filter.Section != null)
+        { response = response.Where(x => !filter.Section.Contains(x.Section)); }
+        if (filter.Key != null)
+        { response = response.Where(x => !filter.Key.Contains(x.Key)); }
+        if (filter.TypeKey != null)
+        { response = response.Where(x => !filter.TypeKey.Contains(x.TypeKey)); }
+        if (filter.Name != null)
+        { response = response.Where(x => !filter.Name.Contains(x.Name)); }
+        if (filter.Type != null)
+        { response = response.Where(x => !filter.Type.Contains(x.Type)); }
+        if (filter.DisplayName != null)
+        { response = response.Where(x => !filter.DisplayName.Contains(x.DisplayName)); }
+        if (filter.Value != null)
+        { response = response.Where(x => !filter.Value.Contains(x.Value)); }
+        if (filter.Title != null)
+        { response = response.Where(x => !filter.Title.Contains(x.Title)); }
+
 
         if (format.Format == "html")
         {
