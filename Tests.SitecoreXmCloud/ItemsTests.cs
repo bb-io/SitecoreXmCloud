@@ -24,9 +24,9 @@ public class ItemsTests : TestBase
 
         var result = await actions.SearchItems(new SearchItemsRequest 
         {
-            CreatedAt = DateTime.Now.AddDays(-300),
-            CreatedOperation = "GreaterOrEqual",
-            Locale = "en",
+            //CreatedAt = DateTime.Parse("2024-04-09T15:30:08.0000000Z"),
+            //CreatedOperation = "GreaterOrEqual",
+            //Locale = "en",
         });
         Console.WriteLine($"Total items: {result.Items.Count()}");
         Console.WriteLine(JsonConvert.SerializeObject(result.Items, Formatting.Indented));

@@ -1,11 +1,6 @@
 ﻿using Apps.Sitecore.Polling;
 using Apps.Sitecore.Polling.Memory;
 using Blackbird.Applications.Sdk.Common.Polling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tests.Sitecore.Base;
 
 namespace Tests.Sitecore
@@ -48,7 +43,7 @@ namespace Tests.Sitecore
             var polling = new PollingList(InvocationContext);
             var initialMemory = new DateMemory
             {
-                LastInteractionDate = DateTime.Parse("2025-03-18T15:30:08.0000000Z")
+                LastInteractionDate = DateTime.Parse("2025-04-09T15:30:08.0000000Z")
             };
 
             var request = new PollingEventRequest<DateMemory>

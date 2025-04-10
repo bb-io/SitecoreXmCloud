@@ -93,6 +93,7 @@ public class PollingList : SitecoreInvocable
     public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsUpdatedPolling(
     PollingEventRequest<DateMemory> request, string endpoint)
     {
+
         var items = (await Client.Paginate<ItemEntity>(
             new SitecoreRequest(endpoint, Method.Get, Creds)
         )).ToArray();

@@ -65,6 +65,10 @@ public class SitecoreClient : BlackBirdRestClient
         {
             request.Resource = baseUrl.SetQueryParameter("page", page++.ToString());
             response = await ExecuteWithErrorHandling<T[]>(request);
+            if (response == null)
+            {
+                break;
+            }
 
             result.AddRange(response);
         } while (response.Any());
