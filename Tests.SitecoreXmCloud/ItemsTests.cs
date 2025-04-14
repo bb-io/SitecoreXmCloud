@@ -24,12 +24,24 @@ public class ItemsTests : TestBase
 
         var result = await actions.SearchItems(new SearchItemsRequest 
         {
-            //CreatedAt = DateTime.Parse("2024-04-09T15:30:08.0000000Z"),
-            //CreatedOperation = "GreaterOrEqual",
-            //Locale = "en",
+            RootPath= "/sitecore/content/goto-collection/testpocblackbird/Home/Pricing-Rescue/request-quote/ai/Data/Form",
+            Locale = "en",
         });
         Console.WriteLine($"Total items: {result.Items.Count()}");
-        Console.WriteLine(JsonConvert.SerializeObject(result.Items, Formatting.Indented));
+
+        foreach (var item in result.Items)
+        {
+            Console.WriteLine("=====================================");
+            Console.WriteLine($"Item ID: {item.Id}");
+            Console.WriteLine($"Name: {item.Name}");
+            Console.WriteLine($"Language: {item.Language}");
+            Console.WriteLine($"Version: {item.Version}");
+            Console.WriteLine($"Full path: {item.FullPath}");
+            Console.WriteLine($"Created at: {item.CreatedAt}");
+            Console.WriteLine($"Updated at: {item.UpdatedAt}");
+            Console.WriteLine("=====================================");
+        }
+
         Assert.IsTrue(result.Items.Count() > 0);
     }
 
