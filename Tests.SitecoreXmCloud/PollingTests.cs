@@ -1,11 +1,6 @@
 ﻿using Apps.Sitecore.Polling;
 using Apps.Sitecore.Polling.Memory;
 using Blackbird.Applications.Sdk.Common.Polling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tests.Sitecore.Base;
 
 namespace Tests.Sitecore
@@ -48,7 +43,7 @@ namespace Tests.Sitecore
             var polling = new PollingList(InvocationContext);
             var initialMemory = new DateMemory
             {
-                LastInteractionDate = DateTime.Parse("2025-03-18T15:30:08.0000000Z")
+                LastInteractionDate = DateTime.Parse("2025-04-19T15:30:08.0000000Z")
             };
 
             var request = new PollingEventRequest<DateMemory>
@@ -59,15 +54,15 @@ namespace Tests.Sitecore
             var input = new PollingItemRequest
             {
                 Locale = "en",
-                RootPath = "/sitecore/content/home"
+                RootPath = "/sitecore/content/goto-collection/testpocblackbird/home/pricing-rescue/request-quote/ai/data/form"
             };
 
             var result = await polling.OnItemsUpdated(request, input);
 
-            foreach (var item in result.Result.Items)
-            {
-                Console.WriteLine($"ID: {item.Id}, Name: {item.Name}, Language: {item.Language}, FullPath: {item.FullPath}, CreatedAt: {item.CreatedAt}");
-            }
+            //foreach (var item in result.Result.Items)
+            //{
+            //    Console.WriteLine($"ID: {item.Id}, Name: {item.Name}, Language: {item.Language}, FullPath: {item.FullPath}, CreatedAt: {item.CreatedAt}");
+            //}
             Assert.IsNotNull(result);
         }
     }

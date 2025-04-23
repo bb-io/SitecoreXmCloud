@@ -65,7 +65,10 @@ public class SitecoreClient : BlackBirdRestClient
         {
             request.Resource = baseUrl.SetQueryParameter("page", page++.ToString());
             response = await ExecuteWithErrorHandling<T[]>(request);
-
+            if (response == null)
+            {
+                break;
+            }
             result.AddRange(response);
         } while (response.Any());
 
@@ -74,7 +77,31 @@ public class SitecoreClient : BlackBirdRestClient
 
     protected override Exception ConfigureErrorException(RestResponse response)
     {
-        var error = JsonConvert.DeserializeObject<ErrorResponse>(response.Content!)!;
-        return new PluginApplicationException(error.Error);
+        if (response.ContentType?.Contains("application/json") == true || (response.Content.TrimStart().StartsWith("{") || response.Content.TrimStart().StartsWith("[")))
+        {
+            var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(response.Content);
+            return new PluginApplicationException(errorResponse.Error);
+        }
+        else if (response.ContentType?.Contains("text/html", StringComparison.OrdinalIgnoreCase) == true || response.Content.StartsWith("<"))
+        {
+            var title = ExtractHtmlTagContent(response.Content, "title");
+            var body = ExtractHtmlTagContent(response.Content, "body");
+
+            var errorMessage = $"{title}: \nError Description: {body}";
+            return new PluginApplicationException(errorMessage);
+        }
+        else
+        {
+            var errorMessage = $"Error: {response.ContentType}. Response Content: {response.Content}";
+            throw new PluginApplicationException(errorMessage);
+        }
+    }
+    private string ExtractHtmlTagContent(string html, string tagName)
+    {
+        if (string.IsNullOrEmpty(html)) return string.Empty;
+
+        var regex = new System.Text.RegularExpressions.Regex($"<{tagName}.*?>(.*?)</{tagName}>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        var match = regex.Match(html);
+        return match.Success ? match.Groups[1].Value.Trim() : "N/A";
     }
 }
