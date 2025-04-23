@@ -24,7 +24,8 @@ public class ItemsTests : TestBase
 
         var result = await actions.SearchItems(new SearchItemsRequest 
         {
-            RootPath= "/sitecore/content/goto-collection/testpocblackbird/Home/Pricing-Rescue/request-quote/ai/Data/Form",
+            RootPath= "/sitecore/content/GoTo/LogMeIn",
+
             Locale = "en",
         });
         Console.WriteLine($"Total items: {result.Items.Count()}");
