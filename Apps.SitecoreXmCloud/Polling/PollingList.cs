@@ -6,6 +6,7 @@ using Apps.Sitecore.Polling.Memory;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.Sdk.Common.Polling;
 using RestSharp;
+using System.Globalization;
 
 namespace Apps.Sitecore.Polling;
 
@@ -41,9 +42,13 @@ public class PollingList : SitecoreInvocable
     public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsCreatedPolling(
         PollingEventRequest<DateMemory> request, string endpoint)
     {
-        var items = (await Client.Paginate<ItemEntity>(
-       new SitecoreRequest(endpoint, Method.Get, Creds)
-   )).ToArray();
+
+        if (request.Memory?.LastInteractionDate != default(DateTime))
+        {
+            var createdAt = request.Memory.LastInteractionDate.ToString("o", CultureInfo.InvariantCulture);
+            endpoint += $"&createdOperation=GreaterOrEqual&createdAt={Uri.EscapeDataString(createdAt)}";
+        }
+        var items = (await Client.Paginate<ItemEntity>(new SitecoreRequest(endpoint, Method.Get, Creds))).ToArray();
 
         if (items.Length == 0)
         {

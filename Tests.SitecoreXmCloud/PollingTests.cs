@@ -14,7 +14,7 @@ namespace Tests.Sitecore
             var polling = new PollingList(InvocationContext);
             var initialMemory = new DateMemory
             {
-                LastInteractionDate = DateTime.UtcNow.AddHours(-5)
+                LastInteractionDate = DateTime.UtcNow.AddHours(-1)
             };
 
             var request = new PollingEventRequest<DateMemory>
@@ -25,7 +25,7 @@ namespace Tests.Sitecore
             var input = new PollingItemRequest
             {
                 Locale = "en",
-                RootPath = "/sitecore/content/home"
+                RootPath = "/sitecore/content/GoTo/LogMeIn/Home"
             };
 
             var result = await polling.OnItemsCreated(request, input);
