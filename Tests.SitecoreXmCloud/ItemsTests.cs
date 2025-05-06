@@ -24,7 +24,7 @@ public class ItemsTests : TestBase
 
         var result = await actions.SearchItems(new SearchItemsRequest 
         {
-            RootPath= "/sitecore/content/GoTo/LogMeIn",
+            RootPath= "/sitecore/content/GoTo/LogMeIn/Home",
 
             Locale = "en",
         });
