@@ -19,7 +19,8 @@ public class SitecoreClient : BlackBirdRestClient
     public SitecoreClient(IEnumerable<AuthenticationCredentialsProvider> creds) :
         base(new()
         {
-            BaseUrl = creds.Get(CredsNames.Url).Value.ToUri().Append("api/blackbird")
+            BaseUrl = creds.Get(CredsNames.Url).Value.ToUri().Append("api/blackbird"),
+            MaxTimeout= 240000
         })
     {
         this.AddDefaultHeader("sc_apikey", creds.Get(CredsNames.ApiKey).Value);
