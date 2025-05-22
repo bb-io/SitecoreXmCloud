@@ -11,23 +11,16 @@ using System.Globalization;
 namespace Apps.Sitecore.Polling;
 
 [PollingEventList]
-public class PollingList : SitecoreInvocable
+public class PollingList(InvocationContext invocationContext) : SitecoreInvocable(invocationContext)
 {
-    public PollingList(InvocationContext invocationContext) : base(invocationContext)
-    {
-    }
-
     [PollingEvent("On items created", "On new items created")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsCreated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
     {
         var endpoint = $"/Search?locale={input.Locale}&rootPath={input.RootPath}";
-
         return HandleItemsCreatedPolling(request, endpoint);
     }
-
-
 
     [PollingEvent("On items updated", "On any items updated")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsUpdated(
@@ -38,16 +31,15 @@ public class PollingList : SitecoreInvocable
         return HandleItemsUpdatedPolling(request, endpoint);
     }
 
-
     public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsCreatedPolling(
         PollingEventRequest<DateMemory> request, string endpoint)
     {
-
         if (request.Memory?.LastInteractionDate != default(DateTime))
         {
             var createdAt = request.Memory.LastInteractionDate.ToString("o", CultureInfo.InvariantCulture);
             endpoint += $"&createdOperation=GreaterOrEqual&createdAt={Uri.EscapeDataString(createdAt)}";
         }
+        
         var items = (await Client.Paginate<ItemEntity>(new SitecoreRequest(endpoint, Method.Get, Creds))).ToArray();
 
         if (items.Length == 0)
@@ -55,7 +47,8 @@ public class PollingList : SitecoreInvocable
             return new PollingEventResponse<DateMemory, ListItemsResponse>
             {
                 FlyBird = false,
-                Memory = request.Memory ?? new DateMemory { LastInteractionDate = DateTime.UtcNow }
+                Memory = request.Memory ?? new DateMemory { LastInteractionDate = DateTime.UtcNow },
+                Result = new ListItemsResponse(Array.Empty<ItemEntity>())
             };
         }
 
@@ -66,32 +59,22 @@ public class PollingList : SitecoreInvocable
             return new PollingEventResponse<DateMemory, ListItemsResponse>
             {
                 FlyBird = false,
-                Memory = memory
+                Memory = memory,
+                Result = new ListItemsResponse(items)
             };
         }
 
         var newItems = items.Where(i => i.CreatedAt > request.Memory.LastInteractionDate).ToArray();
 
-        if (newItems.Any())
-        {
-            var maxCreatedAt = newItems.Max(i => i.CreatedAt);
-            request.Memory.LastInteractionDate = maxCreatedAt;
+        var newItemsMaxCreatedAt = newItems.Max(i => i.CreatedAt);
+        request.Memory.LastInteractionDate = newItemsMaxCreatedAt;
 
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
-            {
-                FlyBird = true,
-                Memory = request.Memory,
-                Result = new ListItemsResponse(newItems)
-            };
-        }
-        else
+        return new PollingEventResponse<DateMemory, ListItemsResponse>
         {
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
-            {
-                FlyBird = false,
-                Memory = request.Memory
-            };
-        }
+            FlyBird = newItems.Any(),
+            Memory = request.Memory,
+            Result = new ListItemsResponse(newItems)
+        };
     }
 
 

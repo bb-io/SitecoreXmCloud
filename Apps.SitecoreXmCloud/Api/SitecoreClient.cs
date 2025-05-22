@@ -57,22 +57,8 @@ public class SitecoreClient : BlackBirdRestClient
 
     public async Task<IEnumerable<T>> Paginate<T>(RestRequest request)
     {
-        var page = 1;
-        var baseUrl = request.Resource.SetQueryParameter("pageSize", PaginationStepSize.ToString());
-
-        var result = new List<T>();
-        T[] response;
-        do
-        {
-            request.Resource = baseUrl.SetQueryParameter("page", page++.ToString());
-            response = await ExecuteWithErrorHandling<T[]>(request);
-            if (response == null)
-            {
-                break;
-            }
-            result.AddRange(response);
-        } while (response.Any());
-
+        // Pagination is useless, because the API makes in memory pagination
+        var result = await ExecuteWithErrorHandling<T[]>(request);
         return result;
     }
 
