@@ -14,7 +14,7 @@ namespace Apps.Sitecore.Polling;
 [PollingEventList]
 public class PollingList(InvocationContext invocationContext) : SitecoreInvocable(invocationContext)
 {
-    [PollingEvent("On items created", "On new items created")]
+    [PollingEvent("On items created", "Polls for items that have been created since the last poll.")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsCreated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
@@ -23,7 +23,7 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
         return HandleItemsCreatedPolling(request, endpoint);
     }
 
-    [PollingEvent("On items updated", "On any items updated")]
+    [PollingEvent("On items updated", "Polls for items that have been updated since the last poll.")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)

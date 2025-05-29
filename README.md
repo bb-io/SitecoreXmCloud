@@ -80,8 +80,11 @@ Your solution should look something like this now:
 
 ## Events
 
-- **On items created** triggers when new items are created.
-- **On items updated** triggers when any item is updated.
+- **On items created** Polls for items that have been created since the last poll.
+- **On items updated** Polls for items that have been updated since the last poll.
+- **On items assigned to workflow state** Polls for items that currently have a specific workflow state. This event returns all items with the specified workflow state, regardless of whether they appeared in previous polls. To avoid processing the same items repeatedly, use the **Update workflow state** action after processing each item. For example, you might poll for items in the "Ready for localization" state, process them, and then update their workflow state to "In translation" or "Translation completed".
+
+> Important: The events are not real-time, they are polling events. You can set the polling interval through the UI. The default is 1 hour, minimal is 5 minutes.
 
 ## Example
 
