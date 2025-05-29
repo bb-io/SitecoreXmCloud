@@ -7,12 +7,9 @@ using RestSharp;
 
 namespace Apps.Sitecore.DataSourceHandlers;
 
-public class LocaleDataHandler : SitecoreInvocable, IAsyncDataSourceItemHandler
+public class LocaleDataHandler(InvocationContext invocationContext)
+    : SitecoreInvocable(invocationContext), IAsyncDataSourceItemHandler
 {
-    public LocaleDataHandler(InvocationContext invocationContext) : base(invocationContext)
-    {
-    }
-
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context,
         CancellationToken cancellationToken)
     {

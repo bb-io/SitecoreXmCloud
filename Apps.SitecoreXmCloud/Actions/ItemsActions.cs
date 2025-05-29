@@ -12,12 +12,8 @@ using RestSharp;
 namespace Apps.Sitecore.Actions;
 
 [ActionList]
-public class ItemsActions : SitecoreInvocable
+public class ItemsActions(InvocationContext invocationContext) : SitecoreInvocable(invocationContext)
 {
-    public ItemsActions(InvocationContext invocationContext) : base(invocationContext)
-    {
-    }
-
     [Action("Search items", Description = "Search items based on provided criterias")]
     public async Task<ListItemsResponse> SearchItems([ActionParameter] SearchItemsRequest input)
     {
