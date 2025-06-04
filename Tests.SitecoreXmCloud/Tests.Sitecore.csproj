@@ -28,8 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Input\" />
-    <Folder Include="Output\" />
+    <Folder Include="Files\" />
+    <Folder Include="Files\Input\" />
+    <Folder Include="Files\Output\" />
   </ItemGroup>
 
 </Project>
