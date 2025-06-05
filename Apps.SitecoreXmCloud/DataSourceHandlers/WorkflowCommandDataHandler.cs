@@ -24,6 +24,8 @@ public class WorkflowCommandDataHandler(InvocationContext invocationContext, [Ac
             .AddQueryParameter("itemId", itemContentRequest.ItemId);
 
         var response = await Client.ExecuteWithErrorHandling<ItemWorkflowResponse>(request);
-        return response.Commands.Select(command => new DataSourceItem(command.CommandId, command.CommandName));
+        return response.Commands
+            .Where(x => context.SearchString == null || x.CommandName.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
+            .Select(command => new DataSourceItem(command.CommandId, command.CommandName));
     }
 }

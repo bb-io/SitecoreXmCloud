@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using Apps.SitecoreXmCloud.Models;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Utils.Html.Extensions;
@@ -9,10 +10,12 @@ namespace Apps.Sitecore.Utils;
 public static class SitecoreHtmlConverter
 {
     private const string IdAttr = "id";
+    private static readonly Regex OnlySelfClosingTagRegex = new(@"^\s*<([a-zA-Z][a-zA-Z0-9]*)[^>]*/\s*>\s*$", RegexOptions.Compiled);
 
     public static byte[] ToHtml(IEnumerable<FieldModel> fields, string itemId)
     {
         var htmlDoc = new HtmlDocument();
+
         var htmlNode = htmlDoc.CreateElement("html");
         htmlDoc.DocumentNode.AppendChild(htmlNode);
 
@@ -67,12 +70,21 @@ public static class SitecoreHtmlConverter
             {
                 fieldNode.SetAttributeValue("data-definition", x.Definition);
             }
-            fieldNode.InnerHtml = x.Value;
+
+            if (!string.IsNullOrEmpty(x.Value))
+            {
+                fieldNode.InnerHtml = x.Value;
+                if (OnlySelfClosingTagRegex.IsMatch(x.Value))
+                {
+                    fieldNode.SetAttributeValue("data-self-closing", "true");
+                }
+            }
 
             bodyNode.AppendChild(fieldNode);
         });
 
-        return Encoding.UTF8.GetBytes(htmlDoc.DocumentNode.OuterHtml);
+        string html = htmlDoc.DocumentNode.OuterHtml;
+        return Encoding.UTF8.GetBytes(html);
     }
 
     public static Dictionary<string, string> ToSitecoreFields(byte[] html)
@@ -81,15 +93,37 @@ public static class SitecoreHtmlConverter
         var bodyNode = htmlDoc.DocumentNode.SelectSingleNode("/html/body");
         try
         {
+            return bodyNode.ChildNodes.ToDictionary(x => x.Attributes[IdAttr].Value, x =>
+            {
+                if (x.Attributes.Contains("data-self-closing") && x.Attributes["data-self-closing"].Value == "true")
+                {
+                    string innerHtml = x.InnerHtml.Trim();
+                    if (innerHtml.EndsWith("/>"))
+                    {
+                        return innerHtml;
+                    }
+                    else
+                    {
+                        var tagMatch = Regex.Match(innerHtml, @"<([a-zA-Z][a-zA-Z0-9]*)([^>]*)>");
+                        if (tagMatch.Success)
+                        {
+                            string tagName = tagMatch.Groups[1].Value;
+                            string attributes = tagMatch.Groups[2].Value;
+                            return $"<{tagName}{attributes} />";
+                        }
+                        return innerHtml;
+                    }
+                }
 
-            return bodyNode.ChildNodes.ToDictionary(x => x.Attributes[IdAttr].Value, x => x.InnerHtml);
+                return x.InnerHtml;
+            });
         }
-        catch 
+        catch
         {
             throw new PluginMisconfigurationException("There is no content to extract from the provided file or the format was not the expected one.");
         }
     }
-    
+
     public static string? ExtractItemIdFromHtml(string html)
     {
         var doc = new HtmlDocument();

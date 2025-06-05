@@ -71,7 +71,8 @@ Your solution should look something like this now:
 
 ## Actions
 
-- **Search items** finds items based on your search criteria, including last updated, created, language, path, etc.
+- **Search items** finds items based on your search criteria, including last updated, created, language, path, etc. Please note that 'Workflow' and 'Current workflow state' outputs will only be included **if you specify the optional input 'Workflow state ID'**—otherwise, they will be null.
+- **Get workflow state** Get workflow state of an item. This action retrieves the workflow state of a specific item, which is useful for understanding the current status of the item in the workflow process.
 - **Get all configured languages** returns all the languages that are configured in this Sitecore instance.
 - **Download item content** get the content of an item represented as an HTML or JSON file so that it can be processed by NMT or TMS. You can specify which version/language should be retrieved.
 - **Upload item content** updates the content of a specific version/language from the file exported using _Download content item_ action. Additionally, you can choose to always create a new version.

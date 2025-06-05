@@ -3,6 +3,7 @@ using Apps.Sitecore.Invocables;
 using Apps.Sitecore.Models.Entities;
 using Apps.Sitecore.Models.Requests.Item;
 using Apps.Sitecore.Models.Responses.Item;
+using Apps.SitecoreXmCloud.Models.Responses.Workflows;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
@@ -32,5 +33,13 @@ public class ItemsActions(InvocationContext invocationContext) : SitecoreInvocab
                    .ToList();
 
         return new ListItemsResponse(latestItems);
+    }
+
+    [Action("Get workflow state", Description = "Get workflow state of an item")]
+    public async Task<ItemWorkflowResponse> GetWorkflowState([ActionParameter] ItemContentRequest itemRequest)
+    {
+        var request = new SitecoreRequest("/GetItemWorkflow", Method.Get, Creds)
+            .AddQueryParameter("itemId", itemRequest.ItemId);
+        return await Client.ExecuteWithErrorHandling<ItemWorkflowResponse>(request);
     }
 }
