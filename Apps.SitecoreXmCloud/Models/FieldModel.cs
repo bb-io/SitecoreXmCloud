@@ -1,43 +1,42 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Apps.SitecoreXmCloud.Models
+namespace Apps.SitecoreXmCloud.Models;
+
+public class FieldModel
 {
-    public class FieldModel
-    {
-        [JsonPropertyName("id")]
-        public string ID { get; set; }
+    [JsonPropertyName("ID")]
+    public string ID { get; set; }
 
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
+    [JsonPropertyName("Value")]
+    public string Value { get; set; }
 
-        [JsonPropertyName("type")]
-        public string? Type { get; set; }
+    [JsonPropertyName("Type")]
+    public string? Type { get; set; }
 
-        [JsonPropertyName("type-key")]
-        public string? TypeKey { get; set; }
+    [JsonPropertyName("TypeKey")]
+    public string? TypeKey { get; set; }
 
-        [JsonPropertyName("definition")]
-        public string? Definition { get; set; }
+    [JsonPropertyName("Definition")]
+    public string? Definition { get; set; }
 
-        [JsonPropertyName("description")]
-        public string? Description { get; set; }
+    [JsonPropertyName("Description")]
+    public string? Description { get; set; }
 
-        [JsonPropertyName("display-name")]
-        public string? DisplayName { get; set; }
+    [JsonPropertyName("DisplayName")]
+    public string? DisplayName { get; set; }
 
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
+    [JsonPropertyName("Name")]
+    public string? Name { get; set; }
 
-        [JsonPropertyName("key")]
-        public string? Key { get; set; }
+    [JsonPropertyName("Key")]
+    public string? Key { get; set; }
 
-        [JsonPropertyName("section")]
-        public string? Section { get; set; }
+    [JsonPropertyName("Section")]
+    public string? Section { get; set; }
 
-        [JsonPropertyName("section-display-name")]
-        public string? SectionDisplayName { get; set; }
+    [JsonPropertyName("SectionDisplayName")]
+    public string? SectionDisplayName { get; set; }
 
-        [JsonPropertyName("title")]
-        public string? Title { get; set; }
-    }
+    [JsonPropertyName("Title")]
+    public string? Title { get; set; }
 }

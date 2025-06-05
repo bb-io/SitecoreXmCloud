@@ -1,15 +1,8 @@
 ﻿using Apps.Sitecore.Actions;
-using Apps.Sitecore.Connections;
 using Apps.Sitecore.Models;
 using Apps.Sitecore.Models.Requests.Item;
 using Apps.SitecoreXmCloud.Models.Requests.Item;
 using Blackbird.Applications.Sdk.Common.Files;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tests.Sitecore.Base;
 
 namespace Tests.Sitecore;
@@ -22,9 +15,9 @@ public class ItemsTests : TestBase
     {
         var actions = new ItemsActions(InvocationContext);
 
-        var result = await actions.SearchItems(new SearchItemsRequest 
+        var result = await actions.SearchItems(new SearchItemsRequest
         {
-            RootPath= "/sitecore/content/GoTo/LogMeIn/Home",
+            RootPath = "/sitecore/content/GoTo/LogMeIn/Home",
 
             Locale = "en",
         });
@@ -51,14 +44,36 @@ public class ItemsTests : TestBase
     public async Task Get_Item_As_HTML_works()
     {
         var actions = new ContentActions(InvocationContext, FileManager);
-        var input = new ItemContentRequest { 
-            ItemId = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}",
-            //Version = "Copy of About Us_1"
+        var input = new ItemContentRequest
+        {
+            ItemId = "1",
+            //Version = "Copy of About Us_1",
+            Locale = "en",
         };
-        var fileFormat = new Apps.SitecoreXmCloud.Models.Requests.Item.FileFormatInput { Format = "html"};
-        var filter = new FilteringOptions();
 
-        var result = await actions.GetItemContent(input, fileFormat,filter);
+        var fileFormat = new FileFormatInput { Format = "html" };
+        var filter = new FilteringOptions
+        {
+            Type =
+            [
+                "Rich Text",
+                "Checkbox",
+                "Date",
+                "Datetime",
+                "Droptree",
+                "File",
+                "Hidden",
+                "Integer",
+                "Multilist",
+                "Number",
+                "Treelist",
+                "TreelistEx",
+                "Droplink"
+            ],
+            Description = ["DNT"]
+        };
+
+        var result = await actions.GetItemContent(input, fileFormat, filter);
 
         Console.WriteLine($"File: {result.File.Name}");
         Assert.IsNotNull(result.File);
@@ -70,24 +85,21 @@ public class ItemsTests : TestBase
         var actions = new ContentActions(InvocationContext, FileManager);
         var input = new ItemContentOptionalRequest
         {
-            ItemId = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}"
+            ItemId = "{909F3372-462D-4808-BD78-DCF6A979AEC3}"
         };
 
         var file = new FileModel
         {
             File = new FileReference
             {
-                Name = "{6E6E9C8F-2D14-4B67-81EF-0770715C4C41}.html"
+                Name = "{909F3372-462D-4808-BD78-DCF6A979AEC3}.html"
             }
         };
         var item = new UpdateItemContentRequest
         {
         };
 
-       await actions.UpdateItemContent(input, file, item);
-
-        Assert.IsTrue(true);    
+        await actions.UpdateItemContent(input, file, item);
+        Assert.IsTrue(true);
     }
 }
-
-

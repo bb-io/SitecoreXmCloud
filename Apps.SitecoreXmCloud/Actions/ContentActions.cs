@@ -13,13 +13,11 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Blackbird.Applications.Sdk.Utils.Extensions.Files;
 using Blackbird.Applications.Sdk.Utils.Extensions.String;
-using HtmlAgilityPack;
 using RestSharp;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Apps.SitecoreXmCloud.Models;
 using Apps.SitecoreXmCloud.Models.Requests.Item;
 using Apps.SitecoreXmCloud.Utils;
-using System.Security.Cryptography;
 
 namespace Apps.Sitecore.Actions;
 
@@ -34,44 +32,75 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         var endpoint = "/Content".WithQuery(input);
         var request = new SitecoreRequest(endpoint, Method.Get, Creds);
 
-        IEnumerable<FieldModel> response;
+        List<FieldModel> response;
         try
         {
-            response = await Client.ExecuteWithErrorHandling<IEnumerable<FieldModel>>(request);
+            response = await Client.ExecuteWithErrorHandling<List<FieldModel>>(request);
         }
         catch
         {
             var oldresponse = await Client.ExecuteWithErrorHandling<Dictionary<string, string>>(request);
-            response = oldresponse.Select(x => new FieldModel { ID = x.Key, Value = x.Value }).ToArray();
+            response = oldresponse.Select(x => new FieldModel { ID = x.Key, Value = x.Value }).ToList();
         }
 
         if (filter.Section != null)
-        { response = response.Where(x => !filter.Section.Contains(x.Section)); }
+        {
+            response = response.Where(x => !filter.Section.Contains(x.Section)).ToList();
+        }
+
         if (filter.Key != null)
-        { response = response.Where(x => !filter.Key.Contains(x.Key)); }
+        {
+            response = response.Where(x => !filter.Key.Contains(x.Key)).ToList();
+        }
+
         if (filter.TypeKey != null)
-        { response = response.Where(x => !filter.TypeKey.Contains(x.TypeKey)); }
+        {
+            response = response.Where(x => !filter.TypeKey.Contains(x.TypeKey)).ToList();
+        }
+
         if (filter.Name != null)
-        { response = response.Where(x => !filter.Name.Contains(x.Name)); }
+        {
+            response = response.Where(x => !filter.Name.Contains(x.Name)).ToList();
+        }
+
         if (filter.Type != null)
-        { response = response.Where(x => !filter.Type.Contains(x.Type)); }
+        {
+            response = response.Where(x => !filter.Type.Contains(x.Type)).ToList();
+        }
+
         if (filter.DisplayName != null)
-        { response = response.Where(x => !filter.DisplayName.Contains(x.DisplayName)); }
+        {
+            response = response.Where(x => !filter.DisplayName.Contains(x.DisplayName)).ToList();
+        }
+
         if (filter.Value != null)
-        { response = response.Where(x => !filter.Value.Contains(x.Value)); }
+        {
+            response = response.Where(x => !filter.Value.Contains(x.Value)).ToList();
+        }
+
         if (filter.Title != null)
-        { response = response.Where(x => !filter.Title.Contains(x.Title)); }
+        {
+            response = response.Where(x => !filter.Title.Contains(x.Title)).ToList();
+        }
+
         if (filter.Description != null)
-        { response = response.Where(x => !filter.Description.Contains(x.Description)); }
+        {
+            response = response.Where(x => !filter.Description.Contains(x.Description)).ToList();
+        }
+
         if (filter.Definition != null)
-        { response = response.Where(x => !filter.Definition.Contains(x.Definition)); }
+        {
+            response = response.Where(x => !filter.Definition.Contains(x.Definition)).ToList();
+        }
+
         if (filter.SectionDisplayName != null)
-        { response = response.Where(x => !filter.SectionDisplayName.Contains(x.SectionDisplayName)); }
+        {
+            response = response.Where(x => !filter.SectionDisplayName.Contains(x.SectionDisplayName)).ToList();
+        }
 
         if (format.Format == "html")
         {
             var html = SitecoreHtmlConverter.ToHtml(response, input.ItemId);
-
             var file = await fileManagementClient.UploadAsync(new MemoryStream(html), MediaTypeNames.Text.Html,
                 $"{input.ItemId}.html");
             return new()
@@ -91,7 +120,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             };
         }
 
-        return new FileModel();       
+        return new FileModel();
     }
 
     [Action("Upload item content", Description = "Update content of the specific item from a file")]
@@ -116,14 +145,14 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             extractedItemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
             sitecoreFields = await SitecoreJsonConverter.ExtractFromJsonAsync(bytes);
         }
-        
+
         var itemId = itemContent.ItemId ?? extractedItemId ?? throw new PluginMisconfigurationException("Didn't find item Item ID in the HTML file. Please provide it in the input.");
         itemContent.ItemId = itemId;
 
         if (input.AddNewVersion is true)
         {
             itemContent.Version = null;
-            await CreateItemContent(new ItemContentRequest { ItemId = itemContent.ItemId, Version = itemContent.Version, Locale = itemContent.Locale});
+            await CreateItemContent(new ItemContentRequest { ItemId = itemContent.ItemId, Version = itemContent.Version, Locale = itemContent.Locale });
         }
         var endpoint = "/Content".WithQuery(itemContent);
         var request = new SitecoreRequest(endpoint, Method.Put, Creds);
@@ -132,7 +161,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
             request.AddParameter($"fields[{x.Key}]", HttpUtility.UrlEncode(HttpUtility.UrlEncode(x.Value))));
         await Client.ExecuteWithErrorHandling(request);
     }
-    
+
     [Action("Get Item ID from file", Description = "Extract Item ID from file")]
     public async Task<GetItemIdFromHtmlResponse> GetItemIdFromHtml([ActionParameter] FileModel file)
     {
@@ -149,7 +178,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         {
             itemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
         }
-        
+
         return new GetItemIdFromHtmlResponse
         {
             ItemId = itemId ?? string.Empty
