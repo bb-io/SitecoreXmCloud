@@ -44,7 +44,7 @@ Your solution should look something like this now:
 
 4. Populate the following fields:
    - Allowed controllers: set to _\*_ or choose controllers.
-   - Impersonation User: the request will be executed as this user. Sitecore admin can create users with some limitations if needed. Anonymous users will be impersonated as this user if the field value is empty.
+   - Impersonation User: the request will be executed as this user. Sitecore admin can create users with some limitations if needed. Anonymous users will be impersonated as this user if the field value is empty or wrong. Make sure you input this value as sitecore\username.
 5. Publish the item.
 
 ![1706111272004](image/README/1706111272004.png)
