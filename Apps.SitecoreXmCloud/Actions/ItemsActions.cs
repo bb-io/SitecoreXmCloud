@@ -40,6 +40,17 @@ public class ItemsActions(InvocationContext invocationContext) : SitecoreInvocab
     {
         var request = new SitecoreRequest("/GetItemWorkflow", Method.Get, Creds)
             .AddQueryParameter("itemId", itemRequest.ItemId);
+        
+        if (!string.IsNullOrEmpty(itemRequest.Locale))
+        {
+            request.AddQueryParameter("locale", itemRequest.Locale);
+        }
+        
+        if (!string.IsNullOrEmpty(itemRequest.Version))
+        {
+            request.AddQueryParameter("version", itemRequest.Version);
+        }
+        
         return await Client.ExecuteWithErrorHandling<ItemWorkflowResponse>(request);
     }
 }

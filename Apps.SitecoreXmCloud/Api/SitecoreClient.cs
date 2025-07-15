@@ -76,25 +76,33 @@ public class SitecoreClient : BlackBirdRestClient
 
     protected override Exception ConfigureErrorException(RestResponse response)
     {
-        if (response.ContentType?.Contains("application/json") == true || (response.Content.TrimStart().StartsWith("{") || response.Content.TrimStart().StartsWith("[")))
+        try
         {
-            var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(response.Content);
-            return new PluginApplicationException(errorResponse.Error);
-        }
-        else if (response.ContentType?.Contains("text/html", StringComparison.OrdinalIgnoreCase) == true || response.Content.StartsWith("<"))
-        {
-            var title = ExtractHtmlTagContent(response.Content, "title");
-            var body = ExtractHtmlTagContent(response.Content, "body");
+            if (response.ContentType?.Contains("application/json") == true || (response.Content.TrimStart().StartsWith("{") || response.Content.TrimStart().StartsWith("[")))
+            {
+                var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(response.Content!)!;
+                return new PluginApplicationException($"{response.StatusCode}, {errorResponse.Error}");
+            }
+            else if (response.ContentType?.Contains("text/html", StringComparison.OrdinalIgnoreCase) == true || response.Content.StartsWith("<"))
+            {
+                var title = ExtractHtmlTagContent(response.Content, "title");
+                var body = ExtractHtmlTagContent(response.Content, "body");
 
-            var errorMessage = $"{title}: \nError Description: {body}";
-            return new PluginApplicationException(errorMessage);
+                var errorMessage = $"{title}: \nError Description: {body}";
+                return new PluginApplicationException(errorMessage);
+            }
+            else
+            {
+                var errorMessage = $"Error: {response.ContentType}. Response Content: {response.Content}";
+                throw new PluginApplicationException(errorMessage);
+            }
         }
-        else
+        catch (Exception)
         {
-            var errorMessage = $"Error: {response.ContentType}. Response Content: {response.Content}";
-            throw new PluginApplicationException(errorMessage);
+            throw new PluginApplicationException($"{response.StatusCode}, {response.Content!}");
         }
     }
+    
     private string ExtractHtmlTagContent(string html, string tagName)
     {
         if (string.IsNullOrEmpty(html)) return string.Empty;
