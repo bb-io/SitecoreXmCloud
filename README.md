@@ -71,7 +71,7 @@ Your solution should look something like this now:
 
 ## Actions
 
-- **Search items** finds items based on your search criteria, including last updated, created, language, path, etc. Please note that 'Workflow' and 'Current workflow state' outputs will only be included **if you specify the optional input 'Workflow state ID'**—otherwise, they will be null.
+- **Search items** Finds items based on specified search criteria such as last updated date, creation date, language, path, and more. You can narrow down results with various filters to locate exactly what you need. Note that 'Workflow' and 'Current workflow state' values will only be populated when you provide the optional 'Workflow state ID' input parameter - otherwise these fields will return null. The optional parameter 'Include all subitems' controls the search depth: when set to true (default), the search includes all descendant items under the root path; when set to false, only direct children of the root path are included.
 - **Get workflow state** Get workflow state of an item. This action retrieves the workflow state of a specific item, which is useful for understanding the current status of the item in the workflow process.
 - **Get all configured languages** returns all the languages that are configured in this Sitecore instance.
 - **Download item content** get the content of an item represented as an HTML or JSON file so that it can be processed by NMT or TMS. You can specify which version/language should be retrieved.
