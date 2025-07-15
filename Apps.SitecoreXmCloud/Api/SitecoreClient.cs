@@ -15,12 +15,12 @@ namespace Apps.Sitecore.Api;
 public class SitecoreClient : BlackBirdRestClient
 {
     private const int PaginationStepSize = 20;
-    
+
     public SitecoreClient(IEnumerable<AuthenticationCredentialsProvider> creds) :
         base(new()
         {
             BaseUrl = creds.Get(CredsNames.Url).Value.ToUri().Append("api/blackbird"),
-            MaxTimeout= 240000
+            MaxTimeout = 240000
         })
     {
         this.AddDefaultHeader("sc_apikey", creds.Get(CredsNames.ApiKey).Value);
@@ -45,7 +45,8 @@ public class SitecoreClient : BlackBirdRestClient
         {
             var response = client.Post<OAuthResponse>(request);
             return response?.AccessToken;
-        } catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             if (ex.Message.Contains("Unauthorized"))
             {
@@ -78,6 +79,16 @@ public class SitecoreClient : BlackBirdRestClient
     {
         try
         {
+            if (string.IsNullOrEmpty(response.Content))
+            {
+                if (string.IsNullOrEmpty(response.ErrorMessage))
+                {
+                    return new PluginApplicationException("Unknown error occurred. No content or error message provided. Status code: " + response.StatusCode);
+                }
+
+                return new PluginApplicationException($"{response.ErrorMessage}. Status code: {response.StatusCode}");
+            }
+
             if (response.ContentType?.Contains("application/json") == true || (response.Content.TrimStart().StartsWith("{") || response.Content.TrimStart().StartsWith("[")))
             {
                 var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(response.Content!)!;
@@ -102,7 +113,7 @@ public class SitecoreClient : BlackBirdRestClient
             throw new PluginApplicationException($"{response.StatusCode}, {response.Content!}");
         }
     }
-    
+
     private string ExtractHtmlTagContent(string html, string tagName)
     {
         if (string.IsNullOrEmpty(html)) return string.Empty;
