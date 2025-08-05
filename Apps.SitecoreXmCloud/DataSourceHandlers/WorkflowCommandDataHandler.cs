@@ -23,6 +23,16 @@ public class WorkflowCommandDataHandler(InvocationContext invocationContext, [Ac
         var request = new SitecoreRequest("/GetItemWorkflow", Method.Get, Creds)
             .AddQueryParameter("itemId", itemContentRequest.ItemId);
 
+        if(string.IsNullOrEmpty(itemContentRequest.Locale) == false)
+        {
+            request.AddQueryParameter("locale", itemContentRequest.Locale);
+        }
+
+        if(string.IsNullOrEmpty(itemContentRequest.Version) == false)
+        {
+            request.AddQueryParameter("version", itemContentRequest.Version);
+        }
+
         var response = await Client.ExecuteWithErrorHandling<ItemWorkflowResponse>(request);
         return response.Commands
             .Where(x => context.SearchString == null || x.CommandName.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase))
