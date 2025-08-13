@@ -93,6 +93,14 @@ This example shows how one could retrieve a subset of items, based on custom cri
 
 ![1706274178376](image/README/1706274178376.png)
 
+## Demo video
+
+End-to-End Sitecore Localization Using Blackbird.io
+
+import { YouTube } from '@astro-community/astro-embed-youtube';
+
+<YouTube id="https://youtu.be/JES891sUrVk" />
+
 ## Feedback
 
 Do you want to use this app or do you have feedback on our implementation? Reach out to us using the [established channels](https://www.blackbird.io/) or create an issue.
