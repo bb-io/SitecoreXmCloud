@@ -22,6 +22,15 @@ public class ConnectionValidator : IConnectionValidator
                 return HandleErrorResponse(response);
             }
 
+            if(response.ContentType == "text/html")
+            {
+                return new()
+                {
+                    IsValid = false,
+                    Message = "The Sitecore server returned an HTML response. Please verify the URL you provided, our plugin installed correctly, and ensure that the server is accessible without firewall restrictions."
+                };
+            }
+
             return new()
             {
                 IsValid = true
