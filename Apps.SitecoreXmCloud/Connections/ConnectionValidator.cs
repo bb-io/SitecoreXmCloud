@@ -27,7 +27,7 @@ public class ConnectionValidator : IConnectionValidator
                 return new()
                 {
                     IsValid = false,
-                    Message = "The Sitecore server returned an HTML response. Please verify the URL you provided, and ensure it accessible and doesn't have firewall restrictions."
+                    Message = "The Sitecore server returned an HTML response. Please verify the URL you provided, our plugin installed correctly, and ensure that the server is accessible without firewall restrictions."
                 };
             }
 
