@@ -25,8 +25,33 @@ Assuming your source content repository is forked form this [repo](https://githu
 1. Extract the files from [package.zip](https://docs.blackbird.io/sitecore/package.zip)
 2. Copy the 2 config files from `package\files\App_Config\Include\BlackBird` in the package to `authoring\platform\App_Config\Include\` in the source code repository.
 3. Copy the 2 dll files from `package\files\bin` in the package to `authoring\platform\_dlls` in the source code repository.
-4. Open the `XmCloudAuthoring.sln` in Visual Studio (or any other .NET compatible IDE) and add references to the added .dll files in the Platform project.
-5. Also include file references to the 2 config files.
+4. Open the `XmCloudAuthoring.sln` in Visual Studio (or any other .NET compatible IDE) and add references to the added .dll files in the Platform project. Also include file references to the 2 config files and set them to copy always. The project should now contain the references:
+
+```xml
+[...]
+   <ItemGroup>
+      <Reference Include="Microsoft.CSharp" />
+      <Reference Include="Sitecore.BlackbirdIntegration, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+         <SpecificVersion>False</SpecificVersion>
+         <HintPath>_dlls\Sitecore.BlackbirdIntegration.dll</HintPath>
+      </Reference>
+      <Reference Include="Sitecore.BlackbirdIntegration.WebApi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+         <SpecificVersion>False</SpecificVersion>
+         <HintPath>_dlls\Sitecore.BlackbirdIntegration.WebApi.dll</HintPath>
+      </Reference>
+      [...]
+   <ItemGroup>
+[...]
+   <ItemGroup>
+      <Content Include="App_Config\Include\Sitecore.BlackbirdIntegration.config">
+         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      <Content Include="App_Config\Include\Sitecore.BlackbirdIntegration.WebApi.config">
+         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+      [...]
+  </ItemGroup>
+```
 
 Your solution should look something like this now:
 
