@@ -15,13 +15,13 @@ public class WorkflowCommandDataHandler(InvocationContext invocationContext, [Ac
     public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(itemContentRequest.ItemId))
+        if (string.IsNullOrEmpty(itemContentRequest.ContentId))
         {
             throw new ArgumentException("Please provide an item ID first to retrieve workflow states.");
         }
 
         var request = new SitecoreRequest("/GetItemWorkflow", Method.Get, Creds)
-            .AddQueryParameter("itemId", itemContentRequest.ItemId);
+            .AddQueryParameter("itemId", itemContentRequest.ContentId);
 
         if(string.IsNullOrEmpty(itemContentRequest.Locale) == false)
         {

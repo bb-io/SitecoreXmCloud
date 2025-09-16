@@ -8,12 +8,12 @@ using Tests.Sitecore.Base;
 namespace Tests.Sitecore;
 
 [TestClass]
-public class ItemsTests : TestBase
+public class ContentActionTests : TestBase
 {
     [TestMethod]
     public async Task Search_Items_works()
     {
-        var actions = new ItemsActions(InvocationContext);
+        var actions = new ContentActions(InvocationContext, FileManager);
 
         var result = await actions.SearchItems(new SearchItemsRequest
         {
@@ -46,7 +46,7 @@ public class ItemsTests : TestBase
         var actions = new ContentActions(InvocationContext, FileManager);
         var input = new ItemContentRequest
         {
-            ItemId = "1",
+            ContentId = "1",
             //Version = "Copy of About Us_1",
             Locale = "en",
         };
@@ -75,31 +75,26 @@ public class ItemsTests : TestBase
 
         var result = await actions.GetItemContent(input, fileFormat, filter);
 
-        Console.WriteLine($"File: {result.File.Name}");
-        Assert.IsNotNull(result.File);
+        Console.WriteLine($"File: {result.Content.Name}");
+        Assert.IsNotNull(result.Content);
     }
 
     [TestMethod]
     public async Task Update_Item_from_HTML_works()
     {
         var actions = new ContentActions(InvocationContext, FileManager);
-        var input = new ItemContentOptionalRequest
+        var uploadContentRequest = new UploadContentRequest
         {
-            ItemId = "{909F3372-462D-4808-BD78-DCF6A979AEC3}"
-        };
-
-        var file = new FileModel
-        {
-            File = new FileReference
+            ContentId = "{909F3372-462D-4808-BD78-DCF6A979AEC3}",
+            Content = new FileReference
             {
                 Name = "{909F3372-462D-4808-BD78-DCF6A979AEC3}.html"
             }
         };
-        var item = new UpdateItemContentRequest
-        {
-        };
 
-        await actions.UpdateItemContent(input, file, item);
+        var updateItemContentRequest = new UpdateItemContentRequest();
+
+        await actions.UpdateItemContent(uploadContentRequest, updateItemContentRequest);
         Assert.IsTrue(true);
     }
 }

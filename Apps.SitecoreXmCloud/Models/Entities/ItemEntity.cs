@@ -6,7 +6,7 @@ namespace Apps.Sitecore.Models.Entities;
 
 public class ItemEntity
 {
-    [Display("Item ID")]
+    [Display("Content ID")]
     public string Id { get; set; } = string.Empty;
 
     public string Name { get; set; } = string.Empty;

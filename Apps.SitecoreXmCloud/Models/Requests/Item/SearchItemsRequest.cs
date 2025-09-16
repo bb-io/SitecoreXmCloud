@@ -1,5 +1,5 @@
 using Apps.Sitecore.DataSourceHandlers;
-using Apps.Sitecore.DataSourceHandlers.EnumHandlers;
+using Apps.SitecoreXmCloud.DataSourceHandlers.EnumHandlers;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dictionaries;
 using Blackbird.Applications.Sdk.Common.Dynamic;

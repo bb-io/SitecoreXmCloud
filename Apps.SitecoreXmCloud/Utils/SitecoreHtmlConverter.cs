@@ -87,10 +87,11 @@ public static class SitecoreHtmlConverter
         return Encoding.UTF8.GetBytes(html);
     }
 
-    public static Dictionary<string, string> ToSitecoreFields(byte[] html)
+    public static Dictionary<string, string> ToSitecoreFields(string html)
     {
-        var htmlDoc = Encoding.UTF8.GetString(html).AsHtmlDocument();
+        var htmlDoc = html.AsHtmlDocument();
         var bodyNode = htmlDoc.DocumentNode.SelectSingleNode("/html/body");
+        
         try
         {
             return bodyNode.ChildNodes.ToDictionary(x => x.Attributes[IdAttr].Value, x =>

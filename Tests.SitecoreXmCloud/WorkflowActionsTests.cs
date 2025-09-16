@@ -13,7 +13,7 @@ public class WorkflowActionsTests : TestBase
         // Arrange
         var request = new UpdateWorkflowStateRequest
         {
-            ItemId = "481b20da-bcbf-4676-aaa7-3844824521f7",
+            ContentId = "481b20da-bcbf-4676-aaa7-3844824521f7",
             WorkflowCommandId = "65EF04A8-E6E0-45D3-B28B-69793F264193",
             Version = "2",
             Locale = "de"
