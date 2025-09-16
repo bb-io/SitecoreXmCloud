@@ -48,7 +48,7 @@ public class WorkflowActions(InvocationContext invocationContext) : SitecoreInvo
     public async Task<ExecuteCommandResponse> UpdateWorkflowState([ActionParameter] UpdateWorkflowStateRequest request)
     {
         await ValidateWorkflowCommandExists(request.ContentId, request.Locale, request.Version, request.WorkflowCommandId);
-        var bodyDictiory = new Dictionary<string, object>
+        var bodyDictionary = new Dictionary<string, object>
         {
             { "commandId", request.WorkflowCommandId },
             { "comments", request.Comments ?? string.Empty },
@@ -57,17 +57,17 @@ public class WorkflowActions(InvocationContext invocationContext) : SitecoreInvo
 
         if (!string.IsNullOrEmpty(request.Version))
         {
-            bodyDictiory.Add("version", request.Version);
+            bodyDictionary.Add("version", request.Version);
         }
         
         if (!string.IsNullOrEmpty(request.Locale))
         {
-            bodyDictiory.Add("locale", request.Locale);
+            bodyDictionary.Add("locale", request.Locale);
         }
 
         var apiRequest = new SitecoreRequest("/ExecuteCommand", Method.Post, Creds)
             .AddQueryParameter("itemId", request.ContentId)
-            .AddJsonBody(bodyDictiory);
+            .AddJsonBody(bodyDictionary);
         
         return await Client.ExecuteWithErrorHandling<ExecuteCommandResponse>(apiRequest);
     }

@@ -20,6 +20,8 @@ using Apps.SitecoreXmCloud.Models;
 using Apps.SitecoreXmCloud.Models.Requests.Item;
 using Apps.SitecoreXmCloud.Utils;
 using Blackbird.Applications.SDK.Blueprints;
+using Blackbird.Filters.Transformations;
+using Blackbird.Filters.Xliff.Xliff2;
 
 namespace Apps.Sitecore.Actions;
 
@@ -157,10 +159,16 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         var bytes = await fileStream.GetByteData();
         string extractedItemId = "";
         var sitecoreFields = new Dictionary<string, string>();
-
+        
+        var html = Encoding.UTF8.GetString(bytes);
+        if (Xliff2Serializer.IsXliff2(html))
+        {
+            html = Transformation.Parse(html, uploadContentRequest.Content.Name).Target().Serialize();
+            if (html == null) throw new PluginMisconfigurationException("XLIFF did not contain any files");
+        }
+        
         if (uploadContentRequest.Content.Name.EndsWith(".html"))
         {
-            var html = Encoding.UTF8.GetString(bytes);
             extractedItemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
             sitecoreFields = SitecoreHtmlConverter.ToSitecoreFields(bytes);
         }
