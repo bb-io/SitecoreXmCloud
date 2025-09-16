@@ -1,5 +1,6 @@
 ﻿using Apps.Sitecore.Api;
 using Apps.Sitecore.Invocables;
+using Apps.Sitecore.Models.Requests.Item;
 using Apps.SitecoreXmCloud.Models.Requests.Workflows;
 using Apps.SitecoreXmCloud.Models.Responses.Workflows;
 using Blackbird.Applications.Sdk.Common;
@@ -10,7 +11,7 @@ using RestSharp;
 
 namespace Apps.Sitecore.Actions;
 
-[ActionList]
+[ActionList("Workflows")]
 public class WorkflowActions(InvocationContext invocationContext) : SitecoreInvocable(invocationContext)
 {
     [Action("Search workflows", Description = "Retrieve a list of workflows")]
@@ -23,11 +24,30 @@ public class WorkflowActions(InvocationContext invocationContext) : SitecoreInvo
             Workflows = response
         };
     }
+    
+    [Action("Get workflow state", Description = "Get workflow state of an item")]
+    public async Task<ItemWorkflowResponse> GetWorkflowState([ActionParameter] ItemContentRequest itemRequest)
+    {
+        var request = new SitecoreRequest("/GetItemWorkflow", Method.Get, Creds)
+            .AddQueryParameter("itemId", itemRequest.ContentId);
+        
+        if (!string.IsNullOrEmpty(itemRequest.Locale))
+        {
+            request.AddQueryParameter("locale", itemRequest.Locale);
+        }
+        
+        if (!string.IsNullOrEmpty(itemRequest.Version))
+        {
+            request.AddQueryParameter("version", itemRequest.Version);
+        }
+        
+        return await Client.ExecuteWithErrorHandling<ItemWorkflowResponse>(request);
+    }
 
     [Action("Update workflow state", Description = "Update the workflow state of an item")]
     public async Task<ExecuteCommandResponse> UpdateWorkflowState([ActionParameter] UpdateWorkflowStateRequest request)
     {
-        await ValidateWorkflowCommandExists(request.ItemId, request.Locale, request.Version, request.WorkflowCommandId);
+        await ValidateWorkflowCommandExists(request.ContentId, request.Locale, request.Version, request.WorkflowCommandId);
         var bodyDictiory = new Dictionary<string, object>
         {
             { "commandId", request.WorkflowCommandId },
@@ -46,7 +66,7 @@ public class WorkflowActions(InvocationContext invocationContext) : SitecoreInvo
         }
 
         var apiRequest = new SitecoreRequest("/ExecuteCommand", Method.Post, Creds)
-            .AddQueryParameter("itemId", request.ItemId)
+            .AddQueryParameter("itemId", request.ContentId)
             .AddJsonBody(bodyDictiory);
         
         return await Client.ExecuteWithErrorHandling<ExecuteCommandResponse>(apiRequest);
@@ -54,10 +74,9 @@ public class WorkflowActions(InvocationContext invocationContext) : SitecoreInvo
     
     private async Task ValidateWorkflowCommandExists(string itemId, string? locale, string? version, string commandId)
     {
-        var itemActions = new ItemsActions(InvocationContext);
-        var itemWorkflow = await itemActions.GetWorkflowState(new()
+        var itemWorkflow = await GetWorkflowState(new()
         {
-            ItemId = itemId,
+            ContentId = itemId,
             Locale = locale,
             Version = version
         });

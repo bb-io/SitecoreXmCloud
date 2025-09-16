@@ -4,6 +4,7 @@ using System.Web;
 using Apps.Sitecore.Api;
 using Apps.Sitecore.Invocables;
 using Apps.Sitecore.Models;
+using Apps.Sitecore.Models.Entities;
 using Apps.Sitecore.Models.Requests.Item;
 using Apps.Sitecore.Models.Responses.Item;
 using Apps.Sitecore.Utils;
@@ -18,15 +19,39 @@ using Blackbird.Applications.Sdk.Common.Exceptions;
 using Apps.SitecoreXmCloud.Models;
 using Apps.SitecoreXmCloud.Models.Requests.Item;
 using Apps.SitecoreXmCloud.Utils;
+using Blackbird.Applications.SDK.Blueprints;
 
 namespace Apps.Sitecore.Actions;
 
-[ActionList]
+[ActionList("Content")]
 public class ContentActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient)
     : SitecoreInvocable(invocationContext)
 {
-    [Action("Download item content", Description = "Get content of the specific item in a file")]
-    public async Task<FileModel> GetItemContent([ActionParameter] ItemContentRequest input, [ActionParameter] FileFormatInput format,
+    [Action("Search content", Description = "Search content based on provided criteria")]
+    [BlueprintActionDefinition(BlueprintAction.SearchContent)]
+    public async Task<ListItemsResponse> SearchItems([ActionParameter] SearchItemsRequest input)
+    {
+        var endpoint = "/Search".WithQuery(input);
+        var request = new SitecoreRequest(endpoint, Method.Get, Creds);
+
+        var items = await Client.Paginate<ItemEntity>(request);
+
+        var latestItems = items
+            .GroupBy(item => item.Id)
+            .Select(g => g.OrderByDescending(item =>
+            {
+                int versionNumber;
+                return int.TryParse(item.Version, out versionNumber) ? versionNumber : 0;
+            }).FirstOrDefault())
+            .ToList();
+
+        return new ListItemsResponse(latestItems);
+    }
+    
+    [Action("Download content", Description = "Get localizable fields of the specific item")]
+    [BlueprintActionDefinition(BlueprintAction.DownloadContent)]
+    public async Task<FileModel> GetItemContent([ActionParameter] ItemContentRequest input, 
+        [ActionParameter] FileFormatInput format,
         [ActionParameter] FilteringOptions filter)
     {
         var endpoint = "/Content".WithQuery(input);
@@ -100,81 +125,92 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
 
         if (format.Format == "html")
         {
-            var html = SitecoreHtmlConverter.ToHtml(response, input.ItemId);
+            var html = SitecoreHtmlConverter.ToHtml(response, input.ContentId);
             var file = await fileManagementClient.UploadAsync(new MemoryStream(html), MediaTypeNames.Text.Html,
-                $"{input.ItemId}.html");
+                $"{input.ContentId}.html");
             return new()
             {
-                File = file
+                Content = file
             };
         }
         else if (format.Format == "json")
         {
-            var json = SitecoreJsonConverter.GetJsonBytes(response, input.ItemId);
+            var json = SitecoreJsonConverter.GetJsonBytes(response, input.ContentId);
 
             var file = await fileManagementClient.UploadAsync(new MemoryStream(json), MediaTypeNames.Application.Json,
-                $"{input.ItemId}.json");
+                $"{input.ContentId}.json");
             return new()
             {
-                File = file
+                Content = file
             };
         }
 
         return new FileModel();
     }
 
-    [Action("Upload item content", Description = "Update content of the specific item from a file")]
-    public async Task UpdateItemContent(
-        [ActionParameter] ItemContentOptionalRequest itemContent,
-        [ActionParameter] FileModel file,
+    [Action("Upload content", Description = "Upload localizable fields to the specific item from a file")]
+    [BlueprintActionDefinition(BlueprintAction.UploadContent)]
+    public async Task UpdateItemContent([ActionParameter] UploadContentRequest uploadContentRequest,
         [ActionParameter] UpdateItemContentRequest input)
     {
-        var fileStream = await fileManagementClient.DownloadAsync(file.File);
+        var fileStream = await fileManagementClient.DownloadAsync(uploadContentRequest.Content);
         var bytes = await fileStream.GetByteData();
         string extractedItemId = "";
         var sitecoreFields = new Dictionary<string, string>();
 
-        if (file.File.Name.EndsWith(".html"))
+        if (uploadContentRequest.Content.Name.EndsWith(".html"))
         {
             var html = Encoding.UTF8.GetString(bytes);
             extractedItemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
             sitecoreFields = SitecoreHtmlConverter.ToSitecoreFields(bytes);
         }
-        else if (file.File.Name.EndsWith(".json"))
+        else if (uploadContentRequest.Content.Name.EndsWith(".json"))
         {
             extractedItemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
             sitecoreFields = await SitecoreJsonConverter.ExtractFromJsonAsync(bytes);
         }
 
-        var itemId = itemContent.ItemId ?? extractedItemId ?? throw new PluginMisconfigurationException("Didn't find item Item ID in the HTML file. Please provide it in the input.");
-        itemContent.ItemId = itemId;
+        var itemId = uploadContentRequest.ContentId ?? extractedItemId ?? throw new PluginMisconfigurationException("Didn't find item Item ID in the HTML file. Please provide it in the input.");
+        uploadContentRequest.ContentId = itemId;
 
         if (input.AddNewVersion is true)
         {
-            itemContent.Version = null;
-            await CreateItemContent(new ItemContentRequest { ItemId = itemContent.ItemId, Version = itemContent.Version, Locale = itemContent.Locale });
+            uploadContentRequest.Version = null;
+            await CreateItemContent(new ItemContentRequest { ContentId = uploadContentRequest.ContentId, Version = uploadContentRequest.Version, Locale = uploadContentRequest.Locale });
         }
-        var endpoint = "/Content".WithQuery(itemContent);
-        var request = new SitecoreRequest(endpoint, Method.Put, Creds);
+        
+        var request = new SitecoreRequest("/Content", Method.Put, Creds);
+        if(!string.IsNullOrEmpty(uploadContentRequest.Locale))
+        {
+            request.AddParameter("locale", uploadContentRequest.Locale);
+        }
+        if(!string.IsNullOrEmpty(uploadContentRequest.ContentId))
+        {
+            request.AddParameter("itemId", uploadContentRequest.ContentId);
+        }
+        if(!string.IsNullOrEmpty(uploadContentRequest.Version))
+        {
+            request.AddParameter("version", uploadContentRequest.Version);
+        }
 
         sitecoreFields.ToList().ForEach(x =>
             request.AddParameter($"fields[{x.Key}]", HttpUtility.UrlEncode(HttpUtility.UrlEncode(x.Value))));
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    [Action("Get Item ID from file", Description = "Extract Item ID from file")]
+    [Action("Get IDs from item content", Description = "Get Item ID from the HTML or JSON content file")]
     public async Task<GetItemIdFromHtmlResponse> GetItemIdFromHtml([ActionParameter] FileModel file)
     {
-        var htmlStream = await fileManagementClient.DownloadAsync(file.File);
+        var htmlStream = await fileManagementClient.DownloadAsync(file.Content);
         var bytes = await htmlStream.GetByteData();
         string itemId = "";
 
-        if (file.File.Name.EndsWith(".html"))
+        if (file.Content.Name.EndsWith(".html"))
         {
             var html = Encoding.UTF8.GetString(bytes);
             itemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
         }
-        else if (file.File.Name.EndsWith(".json"))
+        else if (file.Content.Name.EndsWith(".json"))
         {
             itemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
         }
@@ -185,7 +221,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         };
     }
 
-    [Action("Delete item content", Description = "Delete specific version of item's content")]
+    [Action("Delete content", Description = "Delete specific version of item's content")]
     public Task DeleteItemContent([ActionParameter] ItemContentRequest input)
     {
         var endpoint = "/Content".WithQuery(input);

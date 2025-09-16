@@ -12,7 +12,7 @@ public class PollingTests : TestBase
     [TestMethod]
     public async Task OnItemsCreated_IsSuccess()
     {
-        var polling = new PollingList(InvocationContext);
+        var polling = new ContentPollingList(InvocationContext);
         var initialMemory = new DateMemory
         {
             LastInteractionDate = DateTime.UtcNow.AddHours(-1)
@@ -41,7 +41,7 @@ public class PollingTests : TestBase
     [TestMethod]
     public async Task OnItemsUpdated_IsSuccess()
     {
-        var polling = new PollingList(InvocationContext);
+        var polling = new ContentPollingList(InvocationContext);
         var initialMemory = new DateMemory
         {
             LastInteractionDate = DateTime.Parse("2025-01-01T15:30:08.0000000Z")

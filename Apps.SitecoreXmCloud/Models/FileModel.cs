@@ -1,8 +1,9 @@
-﻿using Blackbird.Applications.Sdk.Common.Files;
+﻿using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
+using Blackbird.Applications.Sdk.Common.Files;
 
 namespace Apps.Sitecore.Models;
 
-public class FileModel
+public class FileModel : IDownloadContentOutput
 {
-    public FileReference File { get; set; }
+    public FileReference Content { get; set; }
 }
