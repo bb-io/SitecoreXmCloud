@@ -170,12 +170,12 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         if (uploadContentRequest.Content.Name.EndsWith(".html"))
         {
             extractedItemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
-            sitecoreFields = SitecoreHtmlConverter.ToSitecoreFields(bytes);
+            sitecoreFields = SitecoreHtmlConverter.ToSitecoreFields(html);
         }
         else if (uploadContentRequest.Content.Name.EndsWith(".json"))
         {
-            extractedItemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
-            sitecoreFields = await SitecoreJsonConverter.ExtractFromJsonAsync(bytes);
+            extractedItemId = await SitecoreJsonConverter.ExtractItemIdFromJson(html);
+            sitecoreFields = await SitecoreJsonConverter.ExtractFromJsonAsync(html);
         }
 
         var itemId = uploadContentRequest.ContentId ?? extractedItemId ?? throw new PluginMisconfigurationException("Didn't find item Item ID in the HTML file. Please provide it in the input.");
@@ -212,15 +212,15 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
         var htmlStream = await fileManagementClient.DownloadAsync(file.Content);
         var bytes = await htmlStream.GetByteData();
         string itemId = "";
-
+            
+        var fileContent  = Encoding.UTF8.GetString(bytes);
         if (file.Content.Name.EndsWith(".html"))
         {
-            var html = Encoding.UTF8.GetString(bytes);
-            itemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(html);
+            itemId = SitecoreHtmlConverter.ExtractItemIdFromHtml(fileContent);
         }
         else if (file.Content.Name.EndsWith(".json"))
         {
-            itemId = await SitecoreJsonConverter.ExtractItemIdFromJson(bytes);
+            itemId = await SitecoreJsonConverter.ExtractItemIdFromJson(fileContent);
         }
 
         return new GetItemIdFromHtmlResponse
