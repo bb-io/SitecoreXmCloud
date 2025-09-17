@@ -1,10 +1,11 @@
 using Apps.SitecoreXmCloud.Models.Responses;
 using Apps.SitecoreXmCloud.Models.Responses.Workflows;
+using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 
 namespace Apps.Sitecore.Models.Entities;
 
-public class ItemEntity
+public class ItemEntity : IContentOutput
 {
     [Display("Content ID")]
     public string Id { get; set; } = string.Empty;
