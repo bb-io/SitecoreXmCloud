@@ -6,12 +6,12 @@
         <Nullable>enable</Nullable>
         <Product>Sitecore XM Cloud</Product>
         <Description>Cloud deployed version of Sitecore</Description>
-        <Version>1.1.5</Version>
+        <Version>1.1.7</Version>
         <AssemblyName>Apps.SitecoreXmCloud</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Blackbird.Applications.SDK.Blueprints" Version="1.0.0" />
+        <PackageReference Include="Blackbird.Applications.SDK.Blueprints" Version="1.0.0-rc.10308" />
         <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.26" />
         <PackageReference Include="Blackbird.Applications.Sdk.Utils.Html" Version="1.0.1" />
         <PackageReference Include="Blackbird.Filters" Version="1.1.22" />
