@@ -121,10 +121,7 @@ This example shows how one could retrieve a subset of items, based on custom cri
 ## Demo video
 
 End-to-End Sitecore Localization Using Blackbird.io
-
-import { YouTube } from '@astro-community/astro-embed-youtube';
-
-<YouTube id="https://youtu.be/JES891sUrVk" />
+[![Watch the video](https://img.youtube.com/vi/JES891sUrVk/0.jpg)](https://www.youtube.com/watch?v=JES891sUrVk)
 
 ## Feedback
 
