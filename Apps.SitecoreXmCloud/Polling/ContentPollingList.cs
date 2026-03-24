@@ -9,6 +9,7 @@ using RestSharp;
 using System.Globalization;
 using Apps.Sitecore.Polling.Requests;
 using Blackbird.Applications.SDK.Blueprints;
+using Apps.SitecoreXmCloud.Polling.Response;
 
 namespace Apps.Sitecore.Polling;
 
@@ -26,7 +27,7 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
 
     [PollingEvent("On content updated", "Polls for items that have been updated since the last poll.")]
     [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
-    public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsUpdated(
+    public Task<PollingEventResponse<DateMemory, PollingItemsResponse>> OnItemsUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
     {
@@ -35,7 +36,7 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
     }
     
     [PollingEvent("On content assigned to workflow state", "Polls for items that currently have a specific workflow state")]
-    public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsWithWorkflowState(
+    public Task<PollingEventResponse<DateMemory, PollingItemsResponse>> OnItemsWithWorkflowState(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input,
         [PollingEventParameter] WorkflowStateRequest workflowStateRequest)
@@ -91,16 +92,16 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
     }
 
 
-    public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsPolling(PollingEventRequest<DateMemory> request, string endpoint, bool filterForUpdatedDate)
+    public async Task<PollingEventResponse<DateMemory, PollingItemsResponse>> HandleItemsPolling(
+        PollingEventRequest<DateMemory> request, 
+        string endpoint, 
+        bool filterForUpdatedDate)
     {
+        var items = await Client.Paginate<PollingItemEntity>(new SitecoreRequest(endpoint, Method.Get, Creds));
 
-        var items = (await Client.Paginate<ItemEntity>(
-            new SitecoreRequest(endpoint, Method.Get, Creds)
-        )).ToArray();
-
-        if (items.Length == 0)
+        if (!items.Any())
         {
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = false,
                 Memory = request.Memory ?? new DateMemory { LastInteractionDate = DateTime.UtcNow }
@@ -111,7 +112,7 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
         {
             var maxUpdatedAt = items.Max(i => i.UpdatedAt);
             var memory = new DateMemory { LastInteractionDate = maxUpdatedAt };
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = false,
                 Memory = memory
@@ -128,16 +129,16 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
             var maxUpdatedAt = newItems.Max(i => i.UpdatedAt);
             request.Memory.LastInteractionDate = maxUpdatedAt;
 
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = true,
                 Memory = request.Memory,
-                Result = new ListItemsResponse(newItems)
+                Result = new PollingItemsResponse(newItems.ToList())
             };
         }
         else
         {
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = false,
                 Memory = request.Memory
