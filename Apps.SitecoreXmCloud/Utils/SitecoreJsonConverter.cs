@@ -21,9 +21,9 @@ namespace Apps.SitecoreXmCloud.Utils
             return Encoding.UTF8.GetBytes(jsonString);
         }
 
-        public static async Task<Dictionary<string, string>> ExtractFromJsonAsync(byte[] jsonBytes)
+        public static async Task<Dictionary<string, string>> ExtractFromJsonAsync(string json)
         {
-            var doc = JsonDocument.Parse(jsonBytes);
+            var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
             var dictionary = new Dictionary<string, string>();
@@ -49,9 +49,9 @@ namespace Apps.SitecoreXmCloud.Utils
             return (dictionary);
         }
     
-        public static async Task<string> ExtractItemIdFromJson(byte[] jsonBytes)
+        public static async Task<string> ExtractItemIdFromJson(string json)
         {
-            var doc = JsonDocument.Parse(jsonBytes);
+            var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
             if (root.TryGetProperty("blackbird-item-id", out JsonElement ItemID))

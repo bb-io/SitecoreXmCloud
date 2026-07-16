@@ -1,4 +1,5 @@
 ﻿using Apps.Sitecore.DataSourceHandlers;
+using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Newtonsoft.Json;

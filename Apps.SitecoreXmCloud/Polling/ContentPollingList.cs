@@ -8,13 +8,15 @@ using Blackbird.Applications.Sdk.Common.Polling;
 using RestSharp;
 using System.Globalization;
 using Apps.Sitecore.Polling.Requests;
+using Blackbird.Applications.SDK.Blueprints;
+using Apps.SitecoreXmCloud.Polling.Response;
 
 namespace Apps.Sitecore.Polling;
 
-[PollingEventList]
-public class PollingList(InvocationContext invocationContext) : SitecoreInvocable(invocationContext)
+[PollingEventList("Content")]
+public class ContentPollingList(InvocationContext invocationContext) : SitecoreInvocable(invocationContext)
 {
-    [PollingEvent("On items created", "Polls for items that have been created since the last poll.")]
+    [PollingEvent("On content created", "Polls for items that have been created since the last poll.")]
     public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsCreated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
@@ -23,8 +25,9 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
         return HandleItemsCreatedPolling(request, endpoint);
     }
 
-    [PollingEvent("On items updated", "Polls for items that have been updated since the last poll.")]
-    public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsUpdated(
+    [PollingEvent("On content updated", "Polls for items that have been updated since the last poll.")]
+    [BlueprintEventDefinition(BlueprintEvent.ContentCreatedOrUpdatedMultiple)]
+    public Task<PollingEventResponse<DateMemory, PollingItemsResponse>> OnItemsUpdated(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input)
     {
@@ -32,8 +35,8 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
         return HandleItemsPolling(request, endpoint, true);
     }
     
-    [PollingEvent("On items assigned to workflow state", "Polls for items that currently have a specific workflow state")]
-    public Task<PollingEventResponse<DateMemory, ListItemsResponse>> OnItemsWithWorkflowState(
+    [PollingEvent("On content assigned to workflow state", "Polls for items that currently have a specific workflow state")]
+    public Task<PollingEventResponse<DateMemory, PollingItemsResponse>> OnItemsWithWorkflowState(
         PollingEventRequest<DateMemory> request,
         [PollingEventParameter] PollingItemRequest input,
         [PollingEventParameter] WorkflowStateRequest workflowStateRequest)
@@ -42,7 +45,7 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
         return HandleItemsPolling(request, endpoint, false);
     }
 
-    public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsCreatedPolling(
+    private async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsCreatedPolling(
         PollingEventRequest<DateMemory> request, string endpoint)
     {
         if (request.Memory?.LastInteractionDate != default(DateTime))
@@ -89,16 +92,16 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
     }
 
 
-    public async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsPolling(PollingEventRequest<DateMemory> request, string endpoint, bool filterForUpdatedDate)
+    public async Task<PollingEventResponse<DateMemory, PollingItemsResponse>> HandleItemsPolling(
+        PollingEventRequest<DateMemory> request, 
+        string endpoint, 
+        bool filterForUpdatedDate)
     {
+        var items = await Client.Paginate<PollingItemEntity>(new SitecoreRequest(endpoint, Method.Get, Creds));
 
-        var items = (await Client.Paginate<ItemEntity>(
-            new SitecoreRequest(endpoint, Method.Get, Creds)
-        )).ToArray();
-
-        if (items.Length == 0)
+        if (!items.Any())
         {
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = false,
                 Memory = request.Memory ?? new DateMemory { LastInteractionDate = DateTime.UtcNow }
@@ -109,7 +112,7 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
         {
             var maxUpdatedAt = items.Max(i => i.UpdatedAt);
             var memory = new DateMemory { LastInteractionDate = maxUpdatedAt };
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = false,
                 Memory = memory
@@ -126,16 +129,16 @@ public class PollingList(InvocationContext invocationContext) : SitecoreInvocabl
             var maxUpdatedAt = newItems.Max(i => i.UpdatedAt);
             request.Memory.LastInteractionDate = maxUpdatedAt;
 
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = true,
                 Memory = request.Memory,
-                Result = new ListItemsResponse(newItems)
+                Result = new PollingItemsResponse(newItems.ToList())
             };
         }
         else
         {
-            return new PollingEventResponse<DateMemory, ListItemsResponse>
+            return new PollingEventResponse<DateMemory, PollingItemsResponse>
             {
                 FlyBird = false,
                 Memory = request.Memory

@@ -1,16 +1,17 @@
 using Apps.Sitecore.DataSourceHandlers;
+using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Newtonsoft.Json;
 
 namespace Apps.Sitecore.Models.Requests.Item;
 
-public class ItemContentRequest
+public class ItemContentRequest : IDownloadContentInput
 {
-    [Display("Item ID")]
+    [Display("Content ID")]
     [JsonProperty("itemId")]
     [DataSource(typeof(ItemDataHandler))]
-    public string ItemId { get; set; }
+    public string ContentId { get; set; } = string.Empty;
 
     [Display("Language")]
     [JsonProperty("locale")]
