@@ -1,5 +1,4 @@
-﻿using Apps.Sitecore.Models.Entities;
-using Apps.Sitecore.Polling;
+﻿using Apps.Sitecore.Polling;
 using Apps.Sitecore.Polling.Memory;
 using Blackbird.Applications.Sdk.Common.Polling;
 using Newtonsoft.Json;
@@ -16,7 +15,7 @@ public class PollingTests : TestBase
         var polling = new PollingList(InvocationContext);
         var initialMemory = new DateMemory
         {
-            LastInteractionDate = DateTime.UtcNow.AddDays(-20)
+            LastInteractionDate = DateTime.UtcNow.AddHours(-1)
         };
 
         var request = new PollingEventRequest<DateMemory>
@@ -27,15 +26,15 @@ public class PollingTests : TestBase
         var input = new PollingItemRequest
         {
             Locale = "en",
-            //RootPath = "/sitecore/content/GoTo/LogMeIn/Home"
+            RootPath = "/sitecore/content/GoTo/LogMeIn/Home"
         };
 
         var result = await polling.OnItemsCreated(request, input);
-        foreach (var item in result.Result?.Items ?? Array.Empty<ItemEntity>())
+
+        foreach (var item in result.Result.Items)
         {
             Console.WriteLine($"ID: {item.Id}, Name: {item.Name}, Language: {item.Language}, FullPath: {item.FullPath}, CreatedAt: {item.CreatedAt}");
         }
-        
         Assert.IsNotNull(result);
     }
 

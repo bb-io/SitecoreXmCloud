@@ -1,123 +1,75 @@
-using System.Text;
-using System.Text.Encodings.Web;
+﻿using System.Text.Json.Serialization;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using Apps.Sitecore.Utils;
+using System.Text;
 using Apps.SitecoreXmCloud.Models;
-using Apps.SitecoreXmCloud.Models.Entities;
+using System.Text.Encodings.Web;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 
-namespace Apps.SitecoreXmCloud.Utils;
-
-public static class SitecoreJsonConverter
+namespace Apps.SitecoreXmCloud.Utils
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    public class SitecoreJsonConverter
     {
-        WriteIndented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
-
-    public static byte[] ToJson(IEnumerable<FieldModel> fields, string itemId) =>
-        ToJson(fields, new BlackbirdItemMetadata(itemId, null, null, string.Empty, string.Empty, null));
-
-    public static byte[] ToJson(IEnumerable<FieldModel> fields, BlackbirdItemMetadata metadata)
-    {
-        var export = new JsonExportFormat
+        public static byte[] GetJsonBytes(IEnumerable<FieldModel> fields, string itemId)
         {
-            ItemID = metadata.ItemId,
-            UCID = metadata.ItemId,
-            Locale = metadata.Locale,
-            ContentName = metadata.Name,
-            AdminUrl = EmptyToNull(metadata.AdminUrl),
-            SystemName = SitecoreHtmlConverter.SystemName,
-            SystemRef = EmptyToNull(metadata.SystemRef),
-            Fields = fields
-        };
-        return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(export, SerializerOptions));
-    }
-
-    public static JsonObject Parse(byte[] json) =>
-        JsonNode.Parse(json) is JsonObject root
-            ? root
-            : throw new JsonException("Expected a JSON object at the document root.");
-
-    public static string? ExtractItemId(JsonObject root) =>
-        (string?)root["blackbird-ucid"] ?? (string?)root["blackbird-item-id"];
-
-    public static string? ExtractItemId(byte[] json) => ExtractItemId(Parse(json));
-
-    public static Dictionary<string, string> ExtractFields(JsonObject root)
-    {
-        var result = new Dictionary<string, string>();
-        if (root["fields"] is not JsonArray array)
-        {
-            return result;
-        }
-
-        foreach (var element in array)
-        {
-            if (element is not JsonObject field)
+            var exportObject = new JsonExportFormat
             {
-                continue;
-            }
-            var id = (string?)field["id"];
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                continue;
-            }
-            result[id] = (string?)field["value"] ?? string.Empty;
+                ItemID = itemId,
+                Fields = fields
+            };
+
+            string jsonString = JsonSerializer.Serialize(exportObject, new JsonSerializerOptions {WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+            return Encoding.UTF8.GetBytes(jsonString);
         }
-        return result;
-    }
 
-    public static byte[] WriteMetadata(JsonObject root, BlackbirdItemMetadata metadata)
-    {
-        root["blackbird-item-id"] = metadata.ItemId;
-        root["blackbird-ucid"] = metadata.ItemId;
-        SetIfPresent(root, "blackbird-locale", metadata.Locale);
-        SetIfPresent(root, "blackbird-content-name", metadata.Name);
-        SetIfPresent(root, "blackbird-admin-url", metadata.AdminUrl);
-        root["blackbird-system-name"] = SitecoreHtmlConverter.SystemName;
-        SetIfPresent(root, "blackbird-system-ref", metadata.SystemRef);
-        return Encoding.UTF8.GetBytes(root.ToJsonString(SerializerOptions));
-    }
-
-    private static void SetIfPresent(JsonObject root, string key, string? value)
-    {
-        if (!string.IsNullOrEmpty(value))
+        public static async Task<Dictionary<string, string>> ExtractFromJsonAsync(byte[] jsonBytes)
         {
-            root[key] = value;
+            var doc = JsonDocument.Parse(jsonBytes);
+            var root = doc.RootElement;
+
+            var dictionary = new Dictionary<string, string>();
+
+            if (root.TryGetProperty("fields", out JsonElement fieldArray) && fieldArray.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in fieldArray.EnumerateArray())
+                {
+                    if (item.TryGetProperty("id", out var idProp) &&
+                        item.TryGetProperty("value", out var valueProp))
+                    {
+                        string id = idProp.GetString();
+                        string value = valueProp.GetString();
+
+                        if (!string.IsNullOrWhiteSpace(id))
+                        {
+                            dictionary[id] = value ?? string.Empty;
+                        }
+                    }
+                }
+            }
+
+            return (dictionary);
         }
-    }
+    
+        public static async Task<string> ExtractItemIdFromJson(byte[] jsonBytes)
+        {
+            var doc = JsonDocument.Parse(jsonBytes);
+            var root = doc.RootElement;
 
-    private static string? EmptyToNull(string? value) =>
-        string.IsNullOrEmpty(value) ? null : value;
+            if (root.TryGetProperty("blackbird-item-id", out JsonElement ItemID))
+            {
+                return ItemID.GetString();
+            }
+            
+            throw new PluginMisconfigurationException("Blackbird item ID (blackbird-item-id) was not found in the provided file");
+            
+        }
 
-    private class JsonExportFormat
-    {
-        [JsonPropertyName("blackbird-item-id")]
-        public string ItemID { get; set; } = string.Empty;
+    public class JsonExportFormat
+        {
+            [JsonPropertyName("blackbird-item-id")]
+            public string ItemID { get; set; }
 
-        [JsonPropertyName("blackbird-ucid")]
-        public string UCID { get; set; } = string.Empty;
-
-        [JsonPropertyName("blackbird-locale")]
-        public string? Locale { get; set; }
-
-        [JsonPropertyName("blackbird-content-name")]
-        public string? ContentName { get; set; }
-
-        [JsonPropertyName("blackbird-admin-url")]
-        public string? AdminUrl { get; set; }
-
-        [JsonPropertyName("blackbird-system-name")]
-        public string SystemName { get; set; } = string.Empty;
-
-        [JsonPropertyName("blackbird-system-ref")]
-        public string? SystemRef { get; set; }
-
-        [JsonPropertyName("fields")]
-        public IEnumerable<FieldModel> Fields { get; set; } = Array.Empty<FieldModel>();
+            [JsonPropertyName("fields")]
+            public IEnumerable<FieldModel> Fields { get; set; }
+        }
     }
 }
