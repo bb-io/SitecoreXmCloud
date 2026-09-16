@@ -2,6 +2,7 @@ using Apps.Sitecore.DataSourceHandlers;
 using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Models.FileDataSourceItems;
 using Newtonsoft.Json;
 
 namespace Apps.Sitecore.Models.Requests.Item;
@@ -10,7 +11,7 @@ public class ItemContentRequest : IDownloadContentInput
 {
     [Display("Content ID")]
     [JsonProperty("itemId")]
-    [DataSource(typeof(ItemDataHandler))]
+    [FileDataSource(typeof(ItemPickerDataSourceHandler))]
     public string ContentId { get; set; } = string.Empty;
 
     [Display("Language")]

@@ -2,6 +2,7 @@
 using Blackbird.Applications.SDK.Blueprints.Interfaces.CMS;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Models.FileDataSourceItems;
 using Blackbird.Applications.Sdk.Common.Files;
 using Newtonsoft.Json;
 
@@ -18,7 +19,7 @@ public class UploadContentRequest : IUploadContentInput
     
     [Display("Item ID")]
     [JsonProperty("itemId")]
-    [DataSource(typeof(ItemDataHandler))]
+    [FileDataSource(typeof(ItemPickerDataSourceHandler))]
     public string? ContentId { get; set; }
     
     [JsonProperty("version")]
