@@ -258,9 +258,7 @@ public class ContentActions(InvocationContext invocationContext, IFileManagement
 
         try
         {
-            var endpoint = string.IsNullOrEmpty(locale)
-                ? "/Search"
-                : $"/Search?locale={Uri.EscapeDataString(locale)}";
+            var endpoint = "/Search".WithQuery(new SearchItemsRequest { RootPath = itemId, Locale = locale });
             var items = await Client.Paginate<ItemEntity>(new SitecoreRequest(endpoint, Method.Get, Creds));
             return items
                 .Where(x => string.Equals(x.Id, itemId, StringComparison.OrdinalIgnoreCase))

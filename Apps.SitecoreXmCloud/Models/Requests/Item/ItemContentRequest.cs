@@ -9,10 +9,16 @@ namespace Apps.Sitecore.Models.Requests.Item;
 
 public class ItemContentRequest : IDownloadContentInput
 {
+    private string _contentId = string.Empty;
+
     [Display("Content ID")]
     [JsonProperty("itemId")]
     [FileDataSource(typeof(ItemPickerDataSourceHandler))]
-    public string ContentId { get; set; } = string.Empty;
+    public string ContentId
+    {
+        get => _contentId;
+        set => _contentId = value?.Trim() ?? string.Empty;
+    }
 
     [Display("Language")]
     [JsonProperty("locale")]
