@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <Product>Sitecore XM Cloud</Product>
         <Description>Cloud deployed version of Sitecore</Description>
-        <Version>1.1.10</Version>
+        <Version>1.1.11</Version>
         <AssemblyName>Apps.SitecoreXmCloud</AssemblyName>
     </PropertyGroup>
 

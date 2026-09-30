@@ -10,6 +10,8 @@ namespace Apps.SitecoreXmCloud.Models.Requests.Item;
 
 public class UploadContentRequest : IUploadContentInput
 {
+    private string? _contentId;
+
     public FileReference Content { get; set; } = null!;
     
     [Display("Language")]
@@ -20,7 +22,11 @@ public class UploadContentRequest : IUploadContentInput
     [Display("Item ID")]
     [JsonProperty("itemId")]
     [FileDataSource(typeof(ItemPickerDataSourceHandler))]
-    public string? ContentId { get; set; }
+    public string? ContentId
+    {
+        get => _contentId;
+        set => _contentId = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
     
     [JsonProperty("version")]
     public string? Version { get; set; }
