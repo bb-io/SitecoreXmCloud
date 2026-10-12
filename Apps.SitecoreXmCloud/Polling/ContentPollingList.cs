@@ -48,9 +48,9 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
     private async Task<PollingEventResponse<DateMemory, ListItemsResponse>> HandleItemsCreatedPolling(
         PollingEventRequest<DateMemory> request, string endpoint)
     {
-        if (request.Memory?.LastInteractionDate != default(DateTime))
+        if (request.Memory?.LastInteractionDate is not null)
         {
-            var createdAt = request.Memory.LastInteractionDate.ToString("o", CultureInfo.InvariantCulture);
+            string createdAt = request.Memory.LastInteractionDate.ToString("o", CultureInfo.InvariantCulture);
             endpoint += $"&createdOperation=GreaterOrEqual&createdAt={Uri.EscapeDataString(createdAt)}";
         }
         
@@ -80,8 +80,8 @@ public class ContentPollingList(InvocationContext invocationContext) : SitecoreI
 
         var newItems = items.Where(i => i.CreatedAt > request.Memory.LastInteractionDate).ToArray();
 
-        var newItemsMaxCreatedAt = newItems.Max(i => i.CreatedAt);
-        request.Memory.LastInteractionDate = newItemsMaxCreatedAt;
+        if (newItems.Length > 0)
+            request.Memory.LastInteractionDate = newItems.Max(i => i.CreatedAt);
 
         return new PollingEventResponse<DateMemory, ListItemsResponse>
         {
