@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <Product>Sitecore XM Cloud</Product>
         <Description>Cloud deployed version of Sitecore</Description>
-        <Version>1.1.12</Version>
+        <Version>1.1.13</Version>
         <AssemblyName>Apps.SitecoreXmCloud</AssemblyName>
     </PropertyGroup>
 
@@ -20,7 +20,7 @@
 
     <ItemGroup>
         <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
-        <EmbeddedResource CopyToOutputDirectory="Always" Include="..\README.md"/>
+        <EmbeddedResource Include="..\README.md" Link="README.md" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
 </Project>
